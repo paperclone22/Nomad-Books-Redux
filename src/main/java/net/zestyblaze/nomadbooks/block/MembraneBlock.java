@@ -20,6 +20,7 @@ public class MembraneBlock extends StainedGlassBlock {
     }
 
     @Override
+    @Deprecated(since = "2024-03-18")
     public void entityInside(BlockState state, Level world, BlockPos pos, Entity entity) {
         if (entity instanceof Projectile) {
             entity.setDeltaMovement(entity.getDeltaMovement().x()/2, entity.getDeltaMovement().y()/2, entity.getDeltaMovement().z()/2);

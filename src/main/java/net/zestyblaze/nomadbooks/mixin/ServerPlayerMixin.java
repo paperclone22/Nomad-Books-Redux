@@ -1,13 +1,13 @@
 package net.zestyblaze.nomadbooks.mixin;
 
 import com.mojang.authlib.GameProfile;
-import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
@@ -15,11 +15,10 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.zestyblaze.nomadbooks.NomadBooks;
 import net.zestyblaze.nomadbooks.item.NomadBookItem;
+import net.zestyblaze.nomadbooks.util.Constants;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -29,55 +28,63 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin extends Player {
+
+    @Override
     @Shadow public abstract void playNotifySound(@NotNull SoundEvent soundEvent, @NotNull SoundSource soundSource, float f, float g);
 
+    @Override
     @Shadow public abstract void displayClientMessage(@NotNull Component chatComponent, boolean actionBar);
 
-    public ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile, ProfilePublicKey profilePublicKey) {
-        super(level, blockPos, f, gameProfile, profilePublicKey);
+    protected ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
+        super(level, blockPos, f, gameProfile);
     }
 
+    /**
+     * Implements the camp widening mechanic in which a number of biomes are required to visit
+     * @param info CallbackInfo: "the juice that MixIns crave!"
+     */
     @Inject(method = "doTick", at = @At(value = "FIELD", target = "Lnet/minecraft/advancements/CriteriaTriggers;LOCATION:Lnet/minecraft/advancements/critereon/PlayerTrigger;"))
     private void enterBiome(CallbackInfo info) {
-        for(int i = 0; i < this.getInventory().getContainerSize(); ++i) {
-            ItemStack itemStack = this.getInventory().getItem(i);
-            if(itemStack.getItem() instanceof NomadBookItem) {
-                CompoundTag tags = itemStack.getOrCreateTagElement(NomadBooks.MODID);
-                // if inventory has an inked nomad book
-                if(tags.getBoolean("Inked")) {
-                    ListTag visitedBiomes = tags.getList("VisitedBiomes", NbtType.STRING);
-                    if(this.level.getBiome(this.blockPosition()).toString() != null) {
-                        StringTag biome = StringTag.valueOf(this.level.getBiome(this.blockPosition()).toString());
-                        if(!visitedBiomes.contains(biome)) {
-                            // if not first biome (just crafted), increment progress
-                            if(!visitedBiomes.isEmpty()) {
-                                tags.putInt("InkProgress", tags.getInt("InkProgress") + 1);
-                            }
-                            // remove the bottom of the pile of the excluded biomes
-                            if(visitedBiomes.size() > 9) {
-                                visitedBiomes.remove(0);
-                            }
-                            //if goal is reached, upgrade width
-                            if(tags.getInt("InkProgress") >= tags.getInt("InkGoal")) {
-                                tags.putBoolean("Inked", false);
-                                tags.remove("InkProgress");
-                                tags.remove("InkGoal");
-                                tags.remove("VisitedBiomes");
-                                tags.putInt("Width", tags.getInt("Width") + 2);
-                                // if camp is deployed, move the camp pos
-                                BlockPos pos = NbtUtils.readBlockPos(tags.getCompound("CampPos")).offset(-1, 0, -1);
-                                tags.put("CampPos", NbtUtils.writeBlockPos(pos));
-                                // show a chat message to the player
-                                this.playNotifySound(SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.1f, 0.75f);
-                                this.displayClientMessage(Component.translatable("info.nomadbooks.itinerant_ink_done", tags.getInt("Width")).setStyle(Style.EMPTY.withColor(ChatFormatting.BLUE)), false);
-                            } else {
-                                visitedBiomes.add(biome);
-                                tags.put("VisitedBiomes", visitedBiomes);
-                            }
-                        }
-                    }
+        this.getInventory().items.stream().filter(itemStack -> itemStack.getItem() instanceof NomadBookItem)
+            .forEachOrdered(this::inkHandler);
+    }
+
+    private void inkHandler(ItemStack itemStack) {
+        CompoundTag tags = itemStack.getOrCreateTagElement(Constants.MODID);
+        // if inventory has an inked nomad book
+        if (tags.getBoolean(Constants.INKED)) {
+            ListTag visitedBiomes = tags.getList(Constants.VISITED_BIOMES, Tag.TAG_STRING);
+            String currentBiome = this.level().getBiome(this.blockPosition()).toString();
+            if (currentBiome != null && !visitedBiomes.contains(StringTag.valueOf(currentBiome))) {
+                int inkProgress = tags.getInt(Constants.INK_PROGRESS);
+                int inkGoal = tags.getInt(Constants.INK_GOAL);
+                if (!visitedBiomes.isEmpty()) {
+                    // if not first biome (just crafted), increment progress
+                    tags.putInt(Constants.INK_PROGRESS, inkProgress + 1);
+                }
+                // remove the bottom of the pile of the excluded biomes
+                if (visitedBiomes.size() > 9) {
+                    visitedBiomes.remove(0);
+                }
+                  if (inkProgress >= inkGoal-1) {
+                    tags.putBoolean(Constants.INKED, false);
+                    tags.remove(Constants.INK_PROGRESS);
+                    tags.remove(Constants.INK_GOAL);
+                    tags.remove(Constants.VISITED_BIOMES);
+                    tags.putInt(Constants.WIDTH, tags.getInt(Constants.WIDTH) + 2);
+                    // if camp is deployed, move the camp pos
+                    BlockPos pos = NbtUtils.readBlockPos(tags.getCompound(Constants.CAMP_POS)).offset(-1, 0, -1);
+                    tags.put(Constants.CAMP_POS, NbtUtils.writeBlockPos(pos));
+                    // show a chat message to the player
+                    this.playNotifySound(SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.1f, 0.75f);
+                    this.displayClientMessage(Component.translatable("info.nomadbooks.itinerant_ink_done", tags.getInt(Constants.WIDTH)).setStyle(Style.EMPTY.withColor(ChatFormatting.BLUE)), false);
+                } else {
+                    visitedBiomes.add(StringTag.valueOf(currentBiome));
+                    tags.put(Constants.VISITED_BIOMES, visitedBiomes);
                 }
             }
         }
     }
+
+
 }

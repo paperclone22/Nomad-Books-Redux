@@ -1,0 +1,26 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:air",
+    "minecraft:cave_air",
+    "minecraft:void_air",
+    "minecraft:crimson_roots",
+    "minecraft:dead_bush",
+    "minecraft:fern",
+    "minecraft:fire",
+    "minecraft:glow_lichen",
+    "minecraft:grass",
+    "minecraft:hanging_roots",
+    "minecraft:large_fern",
+    "minecraft:lava",
+    "minecraft:light",
+    "minecraft:nether_sprouts",
+    "minecraft:snow",
+    "minecraft:soul_fire",
+    "minecraft:structure_void",
+    "minecraft:tall_grass",
+    "minecraft:vine",
+    "minecraft:warped_roots",
+    "#minecraft:replaceable"
+  ]
+}

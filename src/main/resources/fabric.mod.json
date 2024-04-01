@@ -15,7 +15,7 @@
     "issues": "https://github.com/Ladysnake/Nomad-Books/issues"
   },
 
-  "license": "MIT License",
+  "license": "GPLv3",
   "icon": "icon.png",
 
   "environment": "*",
@@ -25,6 +25,9 @@
     ],
     "client": [
       "net.zestyblaze.nomadbooks.client.NomadBooksClient"
+    ],
+    "fabric-datagen": [
+      "net.zestyblaze.nomadbooks.NomadBooksDataGenerator"
     ]
   },
   "mixins": [
@@ -32,9 +35,12 @@
   ],
 
   "depends": {
-    "fabricloader": ">=0.12.12",
+    "fabricloader": ">=${loader_version}",
     "fabric": "*",
-    "minecraft": "1.19.2",
+    "minecraft": "~${minecraft_version}",
     "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
   }
 }

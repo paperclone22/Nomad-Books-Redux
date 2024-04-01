@@ -1,7 +1,6 @@
 {
   "item.nomadbooks.grass_page": "Grasseite",
   "item.nomadbooks.nomad_book": "Nomadenbuch",
-  "item.nomadbooks.nomad_page": "Nomadenseite",
   "item.nomadbooks.nomad_book.tooltip.height": "H\u00F6he: %s",
   "item.nomadbooks.nomad_book.tooltip.position": "Aufgestellt bei: %s",
   "item.nomadbooks.nomad_book.tooltip.dimension": "Aufgestellt in: %s",
