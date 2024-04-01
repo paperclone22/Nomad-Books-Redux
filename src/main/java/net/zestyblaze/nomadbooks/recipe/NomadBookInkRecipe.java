@@ -3,24 +3,31 @@ package net.zestyblaze.nomadbooks.recipe;
 import com.google.common.collect.Lists;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
 import net.zestyblaze.nomadbooks.NomadBooks;
+import net.zestyblaze.nomadbooks.item.ModItems;
 import net.zestyblaze.nomadbooks.item.NomadBookItem;
+import net.zestyblaze.nomadbooks.util.Constants;
 
 import java.util.List;
 
-public class NomadBookInkRecipe extends CustomRecipe {
-    public NomadBookInkRecipe(ResourceLocation resourceLocation) {
-        super(resourceLocation);
+public class NomadBookInkRecipe extends ShapelessRecipe {
+    public NomadBookInkRecipe(ResourceLocation resourceLocation, CraftingBookCategory category) {
+        super(resourceLocation, "", category, new ItemStack(ModItems.NOMAD_BOOK), NonNullList.of(Ingredient.EMPTY, Ingredient.of(ModItems.NOMAD_BOOK.getDefaultInstance(), ModItems.NETHER_NOMAD_BOOK.getDefaultInstance()), Ingredient.of(Items.GHAST_TEAR), Ingredient.of(Items.CHARCOAL), Ingredient.of(Items.BLUE_DYE)));
     }
 
+    // TODO simplify matches and assemble
     @Override
     public boolean matches(CraftingContainer container, Level level) {
         List<Item> ingredients = Lists.newArrayList();
@@ -40,7 +47,7 @@ public class NomadBookInkRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer container) {
+    public ItemStack assemble(CraftingContainer container, RegistryAccess registryAccess) {
         List<Item> ingredients = Lists.newArrayList();
         ItemStack book = null;
 
@@ -56,10 +63,10 @@ public class NomadBookInkRecipe extends CustomRecipe {
 
         if (book != null && ingredients.size() == 3 && ingredients.contains(Items.GHAST_TEAR) && ingredients.contains(Items.CHARCOAL) && ingredients.contains(Items.BLUE_DYE)) {
             ItemStack ret = book.copy();
-            int width = ret.getOrCreateTagElement(NomadBooks.MODID).getInt("Width");
-            ret.getOrCreateTagElement(NomadBooks.MODID).putBoolean("Inked", true);
-            ret.getOrCreateTagElement(NomadBooks.MODID).putInt("InkGoal", ((width+2)*(width+2) - width*width)/2);
-            ret.getOrCreateTagElement(NomadBooks.MODID).putInt("InkProgress", 0);
+            int width = ret.getOrCreateTagElement(Constants.MODID).getInt(Constants.WIDTH);
+            ret.getOrCreateTagElement(Constants.MODID).putBoolean(Constants.INKED, true);
+            ret.getOrCreateTagElement(Constants.MODID).putInt(Constants.INK_GOAL, ((width+2)*(width+2) - width*width)/3); // Note: this determines the INK_GOAL
+            ret.getOrCreateTagElement(Constants.MODID).putInt(Constants.INK_PROGRESS, 0);
 
             return ret;
         }
