@@ -8,7 +8,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
@@ -21,9 +20,12 @@ import net.zestyblaze.nomadbooks.item.ModItems;
 import net.zestyblaze.nomadbooks.item.NomadBookItem;
 import net.zestyblaze.nomadbooks.util.Constants;
 
+import static net.zestyblaze.nomadbooks.util.Helper.findItem;
+
 public class NetherNomadBookCraftRecipe extends ShapelessRecipe {
     public NetherNomadBookCraftRecipe(ResourceLocation resourceLocation, CraftingBookCategory category) {
-        super(resourceLocation, "", category, getCraftResult(), NonNullList.of(Ingredient.EMPTY, Ingredient.of(ModItems.NOMAD_BOOK.getDefaultInstance()), Ingredient.of(Items.NETHERITE_INGOT)));
+        super(resourceLocation, "", category, getCraftResult(),
+            NonNullList.of(Ingredient.EMPTY, Ingredient.of(ModItems.NOMAD_BOOK.getDefaultInstance()), Ingredient.of(Items.NETHERITE_INGOT)));
     }
 
     public static ItemStack getCraftResult() {
@@ -36,41 +38,23 @@ public class NetherNomadBookCraftRecipe extends ShapelessRecipe {
 
     @Override
     public boolean matches(CraftingContainer container, Level level) {
-        ItemStack book = findNomadBook(container);
-        boolean ingot = findNetheriteIngot(container);
-        return book != null && ingot && book.getOrCreateTag().getFloat(Constants.DEPLOYED) == 0.0f; // Not deployed
+        ItemStack book = findItem(container, item -> item.getItem() instanceof NomadBookItem);
+        ItemStack ingot = findItem(container, item -> item.is(Items.NETHERITE_INGOT));
+        return book != null && ingot != null && book.getOrCreateTag().getFloat(Constants.DEPLOYED) == 0.0f; // Not deployed
     }
 
     @Override
     public ItemStack assemble(CraftingContainer container, RegistryAccess registryAccess) {
-        ItemStack book = findNomadBook(container);
-        boolean ingot = findNetheriteIngot(container);
+        ItemStack book = findItem(container, item -> item.getItem() instanceof NomadBookItem);
+        ItemStack ingot = findItem(container, item -> item.is(Items.NETHERITE_INGOT));
 
-        if (book != null && ingot && book.getOrCreateTag().getFloat(Constants.DEPLOYED) == 0.0f) { // Not deployed
-            ItemStack result = getCraftResult();
+        if (book != null && ingot != null && book.getOrCreateTag().getFloat(Constants.DEPLOYED) == 0.0f) { // Not deployed
+            ItemStack result = getCraftResult(); // TODO perhaps on craft, increase the height and width of the input book ? Might want to wait until after adding "ender page" upgrade
             applyBookDataToResult(book, result);
             return result;
         }
 
         return ItemStack.EMPTY;
-    }
-
-    private ItemStack findNomadBook(CraftingContainer container) {
-        return findItem(container, ModItems.NOMAD_BOOK);
-    }
-
-    private boolean findNetheriteIngot(CraftingContainer container) {
-        return findItem(container, Items.NETHERITE_INGOT) != null;
-    }
-
-    private ItemStack findItem(CraftingContainer container, Item item) {
-        for (int i = 0; i < container.getContainerSize(); ++i) {
-            ItemStack itemStack = container.getItem(i);
-            if (itemStack.getItem() == item) {
-                return itemStack;
-            }
-        }
-        return null;
     }
 
     private void applyBookDataToResult(ItemStack book, ItemStack result) {

@@ -3,16 +3,17 @@
   "id": "nomadbooks",
   "version": "${version}",
 
-  "name": "Nomad Books",
+  "name": "Nomad Books Redux",
   "description": "Nomad encampments deployed from books",
   "authors": [
     "ZestyBlaze",
-    "doctor4t"
+    "doctor4t",
+    "paperclone22"
   ],
   "contact": {
-    "homepage": "https://www.curseforge.com/minecraft/mc-mods/nomad-books",
-    "sources": "https://github.com/Ladysnake/Nomad-Books",
-    "issues": "https://github.com/Ladysnake/Nomad-Books/issues"
+    "homepage": "https://github.com/paperclone22/Nomad-Books-Redux",
+    "sources": "https://github.com/paperclone22/Nomad-Books-Redux",
+    "issues": "https://github.com/paperclone22/Nomad-Books-Redux/issues"
   },
 
   "license": "GPLv3",

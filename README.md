@@ -1,5 +1,7 @@
 # Nomad Books
 
+[//]: # (TODO take screenshots to replace the ones removed from the readme)
+
 [//]: # ([![img]&#40;https://img.shields.io/discord/292744693803122688?color=informational&label=Ladysnake&logo=Discord&#41;]&#40;https://ladysnake.glitch.me&#41;[![img]&#40;http://cf.way2muchnoise.eu/full_rats-mischief_downloads.svg&#41;]&#40;https://www.curseforge.com/minecraft/mc-mods/nomad-books&#41;[![img]&#40;http://cf.way2muchnoise.eu/versions/minecraft_nomad-books_latest.svg&#41;]&#40;https://www.curseforge.com/minecraft/mc-mods/nomad-books&#41;)
 
 **Nomad Books** is a Minecraft Fabric mod that introduces a solution for players that are always adventuring around their world. Nomad books and pages allow these players to store their camp in the form of an item and redeploy it whenever and wherever they wish.
@@ -8,11 +10,9 @@
 
 ### Nomad Books
 
-
 A nomad book is an item that can store a 3x1x3 sized camp. The book displays a campfire as indicator if the camp is deployed (campfire absent) or not (campfire visible).
 
 [//]: # (![CampfireIndicator]&#40;https://user-images.githubusercontent.com/83953120/121961233-700a9780-cd67-11eb-89a1-0a8febe0c533.png&#41;)
-
 
 To **deploy** a camp simply find a flat spot with sufficient space blocked by nothing but plants (grass, flowers, vines,...) and snow and use the nomad book where you want the centre of your camp to be.
 
@@ -89,7 +89,25 @@ By combining the Nomad Book with a netherite ingot in an usual crafting grid the
 
 [//]: # (![NetherNomadBookRecipe]&#40;https://user-images.githubusercontent.com/83953120/122669340-2550ab80-d1bd-11eb-826d-113af5ce1d42.png&#41;)
 
-## Licencing
+## Dev
+
+### Getting Started
+
+- `gradlew clean build`
+- `gradlew genSourcesWithFernFlower`
+- `gradlew runDatagen`
+
+### How to Update or Port
+
+1. Close other projects in Intellij
+1. Update gradle [gradle docs](https://docs.gradle.org/current/userguide/upgrading_version_8.html): *eg.* `./gradlew wrapper --gradle-version 8.6`
+1. Update loom [fabric dev](https://fabricmc.net/develop/) *search for "recommended loom version" in the page*
+1. Update minecraft + fabric loader + fabric api + parchmentmc [fabric dev](https://fabricmc.net/develop/)
+    - Update parchmentmc : org.parchmentmc.data:parchment-1.20.1:2023.09.03@zip (note migrateMappings is only useful for yarn) - [Getting Started](https://parchmentmc.org/docs/getting-started)
+    - NOTE: Mojmap also can't migrateMappings
+    - NOTE: fabricmc recommends Yarn but the community seems to be switching to mojmap. Mojmap is available for all mod loaders. good for multi-loader development.
+
+## Licensing
 
 The code is licensed under GPLv3.
 

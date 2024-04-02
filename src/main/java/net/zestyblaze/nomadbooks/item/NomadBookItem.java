@@ -345,7 +345,7 @@ public class NomadBookItem extends Item {
                 NomadBooks.LOGGER.error("Error creating or retrieving structure: {}", e.getMessage());
                 return false; // 🟧  Return false on error
             }
-            structure.fillFromWorld(world, pos.offset(new BlockPos(0, 0, 0)), new BlockPos(width, height, width), true, Blocks.STRUCTURE_VOID); // wait withEntities is true? test it
+            structure.fillFromWorld(world, pos.offset(new BlockPos(0, 0, 0)), new BlockPos(width, height, width), true, Blocks.STRUCTURE_VOID);
             structure.setAuthor(user.getScoreboardName());
             structureTemplateManager.save(new ResourceLocation(structurePath));
         }

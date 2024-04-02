@@ -86,5 +86,4 @@ public abstract class ServerPlayerMixin extends Player {
         }
     }
 
-
 }

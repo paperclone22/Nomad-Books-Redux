@@ -4,6 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
@@ -21,59 +22,45 @@ import net.zestyblaze.nomadbooks.item.ModItems;
 import net.zestyblaze.nomadbooks.item.NomadBookItem;
 import net.zestyblaze.nomadbooks.util.Constants;
 
+import static net.zestyblaze.nomadbooks.util.Helper.findItem;
+
 public class NomadBookUpgradeRecipe extends ShapelessRecipe {
     public NomadBookUpgradeRecipe(ResourceLocation resourceLocation, CraftingBookCategory category) {
-        super(resourceLocation, "", category, new ItemStack(ModItems.NOMAD_BOOK), NonNullList.of(Ingredient.EMPTY, Ingredient.of(ModItems.NOMAD_BOOK.getDefaultInstance(), ModItems.NETHER_NOMAD_BOOK.getDefaultInstance()), Ingredient.of(ModItems.AQUATIC_MEMBRANE_PAGE, ModItems.MYCELIUM_PAGE)));
+        super(resourceLocation, "", category, new ItemStack(ModItems.NOMAD_BOOK),
+            NonNullList.of(Ingredient.EMPTY, Ingredient.of(ModItems.NOMAD_BOOK.getDefaultInstance(), ModItems.NETHER_NOMAD_BOOK.getDefaultInstance()), Ingredient.of(ModItems.AQUATIC_MEMBRANE_PAGE, ModItems.MYCELIUM_PAGE)));
     }
 
-    // TODO simplify matches and assemble
     @Override
     public boolean matches(CraftingContainer container, Level level) {
-        ItemStack book = null;
-        String upgrade = null;
-
-        for (int i = 0; i < container.getContainerSize(); ++i) {
-            ItemStack itemStack = container.getItem(i);
-            if (book == null && itemStack.getItem() instanceof NomadBookItem) {
-                book = itemStack;
-            } else if (upgrade == null && itemStack.getItem() instanceof BookUpgradeItem) {
-                upgrade = ((BookUpgradeItem) itemStack.getItem()).getUpgrade();
-            } else if (!itemStack.isEmpty()) {
-                return false;
-            }
-        }
+        ItemStack book = findItem(container, item -> item.getItem() instanceof NomadBookItem);
+        ItemStack upgrade = findItem(container, item -> item.getItem() instanceof BookUpgradeItem);
 
         return book != null && upgrade != null;
     }
 
     @Override
     public ItemStack assemble(CraftingContainer container, RegistryAccess registryAccess) {
-        ItemStack book = null;
-        String upgrade = null;
-
-        for (int i = 0; i < container.getContainerSize(); ++i) {
-            ItemStack itemStack = container.getItem(i);
-            if (book == null && itemStack.getItem() instanceof NomadBookItem) {
-                book = itemStack;
-            } else if (upgrade == null && itemStack.getItem() instanceof BookUpgradeItem) {
-                upgrade = ((BookUpgradeItem) itemStack.getItem()).getUpgrade();
-            } else if (!itemStack.isEmpty()) {
-                return ItemStack.EMPTY;
-            }
-        }
+        ItemStack book = findItem(container, item -> item.getItem() instanceof NomadBookItem);
+        ItemStack upgrade = findItem(container, item -> item.getItem() instanceof BookUpgradeItem);
 
         if (book != null && upgrade != null) {
-            ItemStack ret = book.copy();
-            ListTag upgradeList = ret.getOrCreateTagElement(Constants.MODID).getList(Constants.UPGRADES, Tag.TAG_STRING);
-            if (!upgradeList.contains(StringTag.valueOf(upgrade))) {
-                upgradeList.add(StringTag.valueOf(upgrade));
-            }
-            ret.getOrCreateTagElement(Constants.MODID).put(Constants.UPGRADES, upgradeList);
+            ItemStack result = book.copy();
+            CompoundTag tag = result.getOrCreateTagElement(Constants.MODID);
+            ListTag upgradeList = tag.getList(Constants.UPGRADES, Tag.TAG_STRING);
 
-            return ret;
+            if (!upgradeList.contains(StringTag.valueOf(getUpgrade(upgrade)))) {
+                upgradeList.add(StringTag.valueOf(getUpgrade(upgrade)));
+                tag.put(Constants.UPGRADES, upgradeList);
+            }
+
+            return result;
         }
 
         return ItemStack.EMPTY;
+    }
+
+    private String getUpgrade(ItemStack itemStack) {
+        return ((BookUpgradeItem) itemStack.getItem()).getUpgrade();
     }
 
     @Environment(EnvType.CLIENT)
