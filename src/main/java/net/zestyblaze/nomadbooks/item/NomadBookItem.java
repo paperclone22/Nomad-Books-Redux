@@ -1,5 +1,6 @@
 package net.zestyblaze.nomadbooks.item;
 
+import joptsimple.internal.Strings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.core.BlockPos;
@@ -79,7 +80,7 @@ public class NomadBookItem extends Item {
         boolean isDeployed = context.getItemInHand().getOrCreateTag().getFloat(Constants.DEPLOYED) == 1f; // is deployed
 
         if (isDeployed) {
-            // note calls use() idk just note
+            // note calls use()
             this.use(context.getLevel(), Objects.requireNonNull(context.getPlayer()), context.getHand());
             return InteractionResult.FAIL;
         }
@@ -104,21 +105,22 @@ public class NomadBookItem extends Item {
 
         // check if there's enough space
         BoundingBox campVolume = BoundingBox.fromCorners(pos, pos.offset(width - 1, height - 1, width - 1));
-        if (!hasEnoughSpace(context.getLevel(), campVolume, tags)) {
-            if(hasEnoughSpace(context.getLevel(), campVolume.moved(0,1,0),tags)) { // try one higher
-                pos = pos.above();
-                campVolume = campVolume.moved(0,1,0);
-            } else if(hasEnoughSpace(context.getLevel(), campVolume.moved(0,2,0),tags)) { // try two higher
-                pos = pos.above(2);
-                campVolume = campVolume.moved(0, 2, 0);
-            } else {
-                Objects.requireNonNull(context.getPlayer()).displayClientMessage(Component.translatable("error.nomadbooks.no_space"), true);
-                return InteractionResult.FAIL;
+        int spaceY;
+        int maxChecks = 2; // could be config
+        for (spaceY=0; spaceY <= maxChecks; spaceY++) {
+            if (hasEnoughSpace(context.getLevel(), campVolume.moved(0,spaceY,0),tags)) {
+                pos = pos.above(spaceY);
+                campVolume = campVolume.moved(0,spaceY,0);
+                break;
             }
+        }
+        if (spaceY > maxChecks) {
+            Objects.requireNonNull(context.getPlayer()).displayClientMessage(Component.translatable("error.nomadbooks.no_space"), true);
+            return InteractionResult.FAIL;
         }
 
         // mushroom platform upgrade
-        if (tags.getList(Constants.UPGRADES, Tag.TAG_STRING).contains(StringTag.valueOf("fungi_support"))) {
+        if (tags.getList(Constants.UPGRADES, Tag.TAG_STRING).contains(StringTag.valueOf(Constants.FUNGI_SUPPORT))) {
             buildMushroomPlatform(context.getLevel(), pos, width);
         }
 
@@ -143,12 +145,11 @@ public class NomadBookItem extends Item {
             BoundingBox membraneMaxZ = new BoundingBox(membraneVolume.minX()+1, membraneVolume.minY()+1, membraneVolume.maxZ() /*🟩*/, membraneVolume.maxX()-1, membraneVolume.maxY()-1, membraneVolume.maxZ());
             BoundingBox membraneMaxY = new BoundingBox(membraneVolume.minX()+1, membraneVolume.maxY() /*🟩*/, membraneVolume.minZ()+1, membraneVolume.maxX()-1, membraneVolume.maxY(), membraneVolume.maxZ()-1);
             List<BoundingBox> membranePanels = Arrays.asList(membraneMinX, membraneMaxX, membraneMinZ, membraneMaxZ, membraneMaxY);
-            Streams.stream(membranePanels).forEach(panel -> BlockPos.betweenClosedStream(panel).forEach(bp -> {
-                BlockState bs = context.getLevel().getBlockState(bp);
-                if (isBlockUnderwaterReplaceable(bs)) {
-                    context.getLevel().destroyBlock(bp, true);
-                    context.getLevel().setBlock(bp, NomadBooks.MEMBRANE.defaultBlockState(), 2);
-                }
+            Streams.stream(membranePanels).forEach(panel -> BlockPos.betweenClosedStream(panel)
+                .filter(bp -> isBlockUnderwaterReplaceable(context.getLevel().getBlockState(bp)))
+                .forEach(bp -> {
+                context.getLevel().destroyBlock(bp, true);
+                context.getLevel().setBlock(bp, NomadBooks.MEMBRANE.defaultBlockState(), 2);
             }));
         }
         // destroy destroyable blocks in the way
@@ -169,15 +170,8 @@ public class NomadBookItem extends Item {
     }
 
     private boolean isSurfaceValid(Level world, BlockPos pos, int width) {
-        for (int x = 0; x < width; x++) {
-            for (int z = 0; z < width; z++) {
-                BlockPos p = pos.offset(x, -1, z);
-                if (isBlockReplaceable(world.getBlockState(p))) {
-                    return false;
-                }
-            }
-        }
-        return true;
+        BoundingBox surface = new BoundingBox(pos.getX(), pos.getY()-1, pos.getZ(), pos.getX()+width-1, pos.getY()-1, pos.getZ()+width-1);
+        return BlockPos.betweenClosedStream(surface).noneMatch(bp -> isBlockReplaceable(world.getBlockState(bp)));
     }
 
     private boolean hasEnoughSpace(Level world, BoundingBox campVolume, CompoundTag tags) {
@@ -248,7 +242,7 @@ public class NomadBookItem extends Item {
         if (teleportToCampHandler(tags, world, user, pos, width)) { // teleport to camp. not shifting. and either tp will ender-pearls or too far message. else try retrieve below.
             return InteractionResultHolder.success(itemStack);
         }
-        if (createOrRetrieveStructure(tags, structurePath, user, world, pos, width, height)) { // Create a new structure or retrieve the camp. only false on error
+        if (createStructureIfDefaultOrRetrieve(tags, structurePath, user, world, pos, width, height)) { // Create a new structure or retrieve the camp. only false on error
             // set undeployed
             itemStack.getOrCreateTag().putFloat(Constants.DEPLOYED, 0F);
             removeBlocks(tags, world, pos, width, height);
@@ -318,10 +312,12 @@ public class NomadBookItem extends Item {
      * @param height int
      * @return boolean
      */
-    private boolean createOrRetrieveStructure(CompoundTag tags, String structurePath, Player user, Level world, BlockPos pos, int width, int height) {
+    private boolean createStructureIfDefaultOrRetrieve(CompoundTag tags, String structurePath, Player user, Level world, BlockPos pos, int width, int height) {
         // Check if the structure path needs to be generated
         if (structurePath.equals(DEFAULT_STRUCTURE_PATH) || structurePath.equals(NETHER_DEFAULT_STRUCTURE_PATH)) {
-            structurePath = Constants.MODID + ":" + user.getUUID() + "/" + System.currentTimeMillis();
+            List<String> path = Arrays.asList(user.getUUID().toString(), String.valueOf(System.currentTimeMillis()));
+            structurePath = new ResourceLocation(Constants.MODID, Strings.join(path, "/")).toString();
+            NomadBooks.LOGGER.info("Creating Structure (Server thread): " + structurePath);
             tags.putString(Constants.STRUCTURE, structurePath);
         }
         // Server-side logic
@@ -379,8 +375,8 @@ public class NomadBookItem extends Item {
                 }
             });
         }
-        // if mushroom upgrade, remove shroom blocks
-        if (tags.getList(Constants.UPGRADES, Tag.TAG_STRING).contains(StringTag.valueOf("fungi_support"))) {
+        // if mushroom upgrade, remove mushroom blocks
+        if (tags.getList(Constants.UPGRADES, Tag.TAG_STRING).contains(StringTag.valueOf(Constants.FUNGI_SUPPORT))) {
             BoundingBox fungiCap = new BoundingBox(pos.getX(), pos.getY() -1, pos.getZ(), pos.getX() +width -1, pos.getY() -1, pos.getZ() +width -1);
             BlockPos.betweenClosedStream(fungiCap).forEach(bp -> {
                 if (world.getBlockState(bp).getBlock().equals(NomadBooks.NOMAD_MUSHROOM_BLOCK)) {
