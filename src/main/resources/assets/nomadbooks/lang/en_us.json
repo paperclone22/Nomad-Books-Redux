@@ -22,5 +22,8 @@
   "info.nomadbooks.display_boundaries_off": "Display camp boundaries: OFF",
   "info.nomadbooks.itinerant_ink_done": "You have travelled enough for the itinerant ink to write a new page! Your nomad book now has a width of %s.",
   "upgrade.nomadbooks.aquatic_membrane": "Aquatic Membrane",
-  "upgrade.nomadbooks.fungi_support": "Fungi Support"
+  "upgrade.nomadbooks.fungi_support": "Fungi Support",
+  "nomadbooks.midnightconfig.title": "Nomad Books Redux",
+  "nomadbooks.midnightconfig.checksAboveOnDeploy": "checks to deploy with Fungi Support at additional +Y positions",
+  "nomadbooks.midnightconfig.airReplaceable": "Additional blocks to add to the Air Replaceable list"
 }

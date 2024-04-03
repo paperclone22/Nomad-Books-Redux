@@ -16,7 +16,9 @@ repositories {
 		name "Parchment"
 		url "https://maven.parchmentmc.org"
 	}
-//	maven { url "https://maven.shedaniel.me" }
+	maven {
+		url = "https://api.modrinth.com/maven"
+	}
 	mavenCentral()
 }
 
@@ -34,9 +36,8 @@ dependencies {
 		officialMojangMappings()
 		parchment("org.parchmentmc.data:parchment-${project.parchment_version}@zip")
 	}
-
-//	modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}"
-//	modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}"
+	// MidnightLib config
+	modImplementation "maven.modrinth:midnightlib:${project.midnightlib_version}"
 }
 
 processResources {

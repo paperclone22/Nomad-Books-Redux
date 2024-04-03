@@ -5,6 +5,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -30,6 +31,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -40,9 +42,11 @@ import net.minecraft.world.phys.Vec3;
 import net.zestyblaze.nomadbooks.NomadBooks;
 import net.zestyblaze.nomadbooks.util.Constants;
 import net.zestyblaze.nomadbooks.util.ModTags;
+import net.zestyblaze.nomadbooks.util.NomadBooksConfig;
 import org.apache.commons.lang3.stream.Streams;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -106,7 +110,7 @@ public class NomadBookItem extends Item {
         // check if there's enough space
         BoundingBox campVolume = BoundingBox.fromCorners(pos, pos.offset(width - 1, height - 1, width - 1));
         int spaceY;
-        int maxChecks = 2; // could be config
+        int maxChecks = NomadBooksConfig.checksAboveOnDeploy;
         for (spaceY=0; spaceY <= maxChecks; spaceY++) {
             if (hasEnoughSpace(context.getLevel(), campVolume.moved(0,spaceY,0),tags)) {
                 pos = pos.above(spaceY);
@@ -395,6 +399,33 @@ public class NomadBookItem extends Item {
     }
 
     // End of use()
+
+    /**
+     * Get blocks from the config
+     */
+    private static List<Block> getBlocksFromStrings(List<String> resources) {
+        List<Block> blocks = new ArrayList<>();
+        List<String> notFound = new ArrayList<>();
+
+        for (String resource : resources) {
+            ResourceLocation location = ResourceLocation.tryParse(resource);
+            if (location == null) {
+                notFound.add(resource);
+            } else {
+                NomadBooks.LOGGER.debug("resource: " + location);
+                blocks.add(BuiltInRegistries.BLOCK.get(location));
+            }
+        }
+        if (!notFound.isEmpty()) {
+            NomadBooks.LOGGER.debug(String.format(
+                "ResourceLocation(s) not found from config: %s. ",
+                String.join(", ", notFound)
+            ));
+        }
+
+        return blocks;
+    }
+
     // 3 Util methods
     /**
      * Is the block replaceable in general
@@ -402,7 +433,8 @@ public class NomadBookItem extends Item {
      * @return boolean
      */
     public static boolean isBlockReplaceable(BlockState blockState) {
-        return blockState.is(ModTags.Blocks.IS_AIR_REPLACEABLE);
+        List<Block> configBlocks = getBlocksFromStrings(NomadBooksConfig.airReplaceable); // tmp
+        return blockState.is(ModTags.Blocks.IS_AIR_REPLACEABLE) || configBlocks.contains(blockState.getBlock());
     }
 
     /**

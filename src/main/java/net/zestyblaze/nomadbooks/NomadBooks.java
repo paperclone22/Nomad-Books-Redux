@@ -1,5 +1,6 @@
 package net.zestyblaze.nomadbooks;
 
+import eu.midnightdust.lib.config.MidnightConfig;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
@@ -31,6 +32,7 @@ import net.zestyblaze.nomadbooks.recipe.NomadBookHeightUpgradeRecipe;
 import net.zestyblaze.nomadbooks.recipe.NomadBookInkRecipe;
 import net.zestyblaze.nomadbooks.recipe.NomadBookUpgradeRecipe;
 import net.zestyblaze.nomadbooks.util.Constants;
+import net.zestyblaze.nomadbooks.util.NomadBooksConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +74,9 @@ public class NomadBooks implements ModInitializer {
 
 		// Register Mod Items and Creative Tab
 		ModItems.registerCreativeTabs();
+
+		// Init Midnight config
+		MidnightConfig.init(Constants.MODID, NomadBooksConfig.class);
 
 		// Add Loot Tables
 		UniformGenerator lootTableRange = UniformGenerator.between(0, 1);

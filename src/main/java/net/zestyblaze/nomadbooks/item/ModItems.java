@@ -13,8 +13,10 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.zestyblaze.nomadbooks.NomadBooks;
 import net.zestyblaze.nomadbooks.util.Constants;
 
@@ -52,11 +54,11 @@ public class ModItems {
 	// Mod Block Items
 	public static Block registerBlock(String name, Block block) {
 		registerBlockItem(name, block);
-		return Registry.register(BuiltInRegistries.BLOCK, new ResourceLocation(Constants.MODID, name), block);
+		return Blocks.register(new ResourceLocation(Constants.MODID, name).toString(), block);
 	}
 
 	private static void registerBlockItem(String name, Block block) {
-		Registry.register(BuiltInRegistries.ITEM, new ResourceLocation(Constants.MODID, name), new BlockItem(block, new FabricItemSettings()));
+		Items.registerItem( new ResourceLocation(Constants.MODID, name), new BlockItem(block, new FabricItemSettings()));
 	}
 
 	// Creative Tab
