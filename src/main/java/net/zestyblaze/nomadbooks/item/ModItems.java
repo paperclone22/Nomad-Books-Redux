@@ -33,6 +33,7 @@ public class ModItems {
 	public static final Item NETHER_NOMAD_BOOK = registerItem( "nether_nomad_book", new NetherNomadBookItem(new FabricItemSettings().maxCount(1).rarity(Rarity.RARE).fireproof()));
 	public static final Item AQUATIC_MEMBRANE_PAGE = registerItem( "aquatic_membrane_page", new BookUpgradeItem(new FabricItemSettings().maxCount(1).rarity(Rarity.UNCOMMON), Constants.AQUATIC_MEMBRANE));
 	public static final Item MYCELIUM_PAGE = registerItem( "mycelium_page", new BookUpgradeItem(new FabricItemSettings().maxCount(1).rarity(Rarity.UNCOMMON), Constants.FUNGI_SUPPORT));
+	public static final Item SPACIAL_DISPLACER_PAGE = registerItem( "spacial_displacer_page", new BookUpgradeItem(new FabricItemSettings().maxCount(1).rarity(Rarity.UNCOMMON), Constants.SPACIAL_DISPLACER));
 	public static final Item CREATIVE_NOMAD_BOOK = registerItem( "creative_nomad_book", new NetherNomadBookItem(new FabricItemSettings().maxCount(1).rarity(Rarity.RARE).fireproof()) {
 		@Override
 		public ItemStack getDefaultInstance() {
@@ -46,6 +47,7 @@ public class ModItems {
 			ListTag upgradeList = new ListTag();
 			upgradeList.add(StringTag.valueOf(Constants.AQUATIC_MEMBRANE));
 			upgradeList.add(StringTag.valueOf(Constants.FUNGI_SUPPORT));
+			upgradeList.add(StringTag.valueOf(Constants.SPACIAL_DISPLACER));
 			tags.put(Constants.UPGRADES, upgradeList);
 			return itemStack;
 		}
@@ -71,6 +73,7 @@ public class ModItems {
 				entries.accept(ModItems.NETHER_NOMAD_BOOK.getDefaultInstance());
 				entries.accept(ModItems.AQUATIC_MEMBRANE_PAGE);
 				entries.accept(ModItems.MYCELIUM_PAGE);
+				entries.accept(ModItems.SPACIAL_DISPLACER_PAGE);
 				entries.accept(ModItems.CREATIVE_NOMAD_BOOK.getDefaultInstance());
 				//  See: https://youtu.be/5VEh1dDngd8?si=5B9WQH_VFxQtILjq
 				entries.accept(NomadBooks.MEMBRANE);

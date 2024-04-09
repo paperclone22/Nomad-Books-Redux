@@ -24,6 +24,7 @@ public class ModModelProvider extends FabricModelProvider {
 		itemModelGenerator.generateFlatItem(ModItems.GRASS_PAGE, ModelTemplates.FLAT_ITEM);
 		itemModelGenerator.generateFlatItem(ModItems.AQUATIC_MEMBRANE_PAGE, ModelTemplates.FLAT_ITEM);
 		itemModelGenerator.generateFlatItem(ModItems.MYCELIUM_PAGE, ModelTemplates.FLAT_ITEM);
+		itemModelGenerator.generateFlatItem(ModItems.SPACIAL_DISPLACER_PAGE, ModelTemplates.FLAT_ITEM);
 	}
 
 }

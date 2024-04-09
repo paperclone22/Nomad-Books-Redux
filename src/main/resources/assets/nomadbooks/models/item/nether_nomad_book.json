@@ -1,8 +1,5 @@
 {
 	"parent": "item/generated",
-    "textures": {
-        "layer0": "nomadbooks:item/nether_nomad_book"
-    },
 	"overrides": [
 		{
 			"predicate": {
@@ -10,5 +7,22 @@
 			},
 			"model": "nomadbooks:item/nether_nomad_book_deployed"
 		}
-	]
+	],
+	"textures": {
+		"layer0": "nomadbooks:item/nether_nomad_book_color",
+		"layer1": "nomadbooks:item/nether_nomad_book_pages",
+		"layer2": "nomadbooks:item/nether_nomad_book_mark"
+	},
+	"display": {
+		"thirdperson": {
+			"rotation": [ 0, 0, 0 ],
+			"translation": [ 0, 0, 0 ],
+			"scale": [ 0.4, 0.4, 0.4 ]
+		},
+		"firstperson": {
+			"rotation": [ 0, 0, 0 ],
+			"translation": [ 0, 0, 0 ],
+			"scale": [ 0.4, 0.4, 0.4 ]
+		}
+	}
 }

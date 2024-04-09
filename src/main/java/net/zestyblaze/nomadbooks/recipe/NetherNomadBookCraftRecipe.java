@@ -49,7 +49,7 @@ public class NetherNomadBookCraftRecipe extends ShapelessRecipe {
         ItemStack ingot = findItem(container, item -> item.is(Items.NETHERITE_INGOT));
 
         if (book != null && ingot != null && book.getOrCreateTag().getFloat(Constants.DEPLOYED) == 0.0f) { // Not deployed
-            ItemStack result = getCraftResult(); // TODO perhaps on craft, increase the height and width of the input book ? Might want to wait until after adding "ender page" upgrade
+            ItemStack result = getCraftResult(); // perhaps on craft, increase the height and width of the input book ? Might want to wait until after adding "ender page" upgrade
             applyBookDataToResult(book, result);
             return result;
         }

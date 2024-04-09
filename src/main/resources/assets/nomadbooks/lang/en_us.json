@@ -2,9 +2,10 @@
   "item.nomadbooks.grass_page": "Grass Page",
   "item.nomadbooks.nomad_book": "Nomad Book",
   "item.nomadbooks.nether_nomad_book": "Nether Nomad Book",
-  "item.nomadbooks.creative_nomad_book": "Nether Nomad Book",
+  "item.nomadbooks.creative_nomad_book": "Creative Nomad Book",
   "item.nomadbooks.aquatic_membrane_page": "Aquatic Membrane Page",
   "item.nomadbooks.mycelium_page": "Mycelium Page",
+  "item.nomadbooks.spacial_displacer_page": "Spacial Displacer Page",
   "item.nomadbooks.nomad_book.tooltip.height": "Height: %s",
   "item.nomadbooks.nomad_book.tooltip.width": "Width: %s",
   "item.nomadbooks.nomad_book.tooltip.position": "Deployed at: %s",
@@ -23,7 +24,9 @@
   "info.nomadbooks.itinerant_ink_done": "You have travelled enough for the itinerant ink to write a new page! Your nomad book now has a width of %s.",
   "upgrade.nomadbooks.aquatic_membrane": "Aquatic Membrane",
   "upgrade.nomadbooks.fungi_support": "Fungi Support",
+  "upgrade.nomadbooks.spacial_displacer": "Spacial Displacer",
   "nomadbooks.midnightconfig.title": "Nomad Books Redux",
   "nomadbooks.midnightconfig.checksAboveOnDeploy": "checks to deploy with Fungi Support at additional +Y positions",
-  "nomadbooks.midnightconfig.airReplaceable": "Additional blocks to add to the Air Replaceable list"
+  "nomadbooks.midnightconfig.airReplaceable": "Additional blocks to add to the Air Replaceable list",
+  "nomadbooks.midnightconfig.notSpacialDisplaceable": "Blocks that should never be displaced as Terrain"
 }

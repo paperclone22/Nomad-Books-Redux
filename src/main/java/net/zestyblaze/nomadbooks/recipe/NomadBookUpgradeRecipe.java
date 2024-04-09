@@ -26,8 +26,9 @@ import static net.zestyblaze.nomadbooks.util.Helper.findItem;
 
 public class NomadBookUpgradeRecipe extends ShapelessRecipe {
     public NomadBookUpgradeRecipe(ResourceLocation resourceLocation, CraftingBookCategory category) {
+        // TODO make a Tag for the upgrade pages
         super(resourceLocation, "", category, new ItemStack(ModItems.NOMAD_BOOK),
-            NonNullList.of(Ingredient.EMPTY, Ingredient.of(ModItems.NOMAD_BOOK.getDefaultInstance(), ModItems.NETHER_NOMAD_BOOK.getDefaultInstance()), Ingredient.of(ModItems.AQUATIC_MEMBRANE_PAGE, ModItems.MYCELIUM_PAGE)));
+            NonNullList.of(Ingredient.EMPTY, Ingredient.of(ModItems.NOMAD_BOOK.getDefaultInstance(), ModItems.NETHER_NOMAD_BOOK.getDefaultInstance()), Ingredient.of(ModItems.AQUATIC_MEMBRANE_PAGE, ModItems.MYCELIUM_PAGE, ModItems.SPACIAL_DISPLACER_PAGE)));
     }
 
     @Override

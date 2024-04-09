@@ -25,6 +25,7 @@ import net.zestyblaze.nomadbooks.block.NomadMushroomBlock;
 import net.zestyblaze.nomadbooks.block.NomadMushroomStemBlock;
 import net.zestyblaze.nomadbooks.item.ModItems;
 import net.zestyblaze.nomadbooks.item.NomadBookItem;
+import net.zestyblaze.nomadbooks.recipe.DyeNomadBookRecipe;
 import net.zestyblaze.nomadbooks.recipe.NetherNomadBookCraftRecipe;
 import net.zestyblaze.nomadbooks.recipe.NomadBookCraftRecipe;
 import net.zestyblaze.nomadbooks.recipe.NomadBookDismantleRecipe;
@@ -67,7 +68,7 @@ public class NomadBooks implements ModInitializer {
 	public static final RecipeSerializer<NomadBookUpgradeRecipe> UPGRADE_NOMAD_BOOK = Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Constants.MODID + ":crafting_special_nomadbookupgrade", new SimpleCraftingRecipeSerializer<>(NomadBookUpgradeRecipe::new));
 	public static final RecipeSerializer<NomadBookInkRecipe> INK_NOMAD_BOOK = Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Constants.MODID + ":crafting_special_nomadbookink", new SimpleCraftingRecipeSerializer<>(NomadBookInkRecipe::new));
 	public static final RecipeSerializer<NetherNomadBookCraftRecipe> CRAFT_NETHER_NOMAD_BOOK = Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Constants.MODID + ":crafting_special_nethernomadbookcraft", new SimpleCraftingRecipeSerializer<>(NetherNomadBookCraftRecipe::new));
-
+	public static final RecipeSerializer<DyeNomadBookRecipe> DYE_NOMAD_BOOK = Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Constants.MODID + ":crafting_special_dyenomadbook", new SimpleCraftingRecipeSerializer<>(DyeNomadBookRecipe::new));
 	@Override
 	public void onInitialize() {
 		LOGGER.info(Constants.MODID + " Loaded");
@@ -80,7 +81,7 @@ public class NomadBooks implements ModInitializer {
 
 		// Add Loot Tables
 		UniformGenerator lootTableRange = UniformGenerator.between(0, 1);
-		UniformGenerator strongholdRange = UniformGenerator.between(0, 3);
+		UniformGenerator strongholdRange = UniformGenerator.between(1, 5);
 
 		// Map the pool names with our loot additions
 		Map<ResourceLocation, LootPool.Builder> lootTableConfigurations = Map.of(

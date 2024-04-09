@@ -1,8 +1,5 @@
 {
 	"parent": "item/generated",
-    "textures": {
-        "layer0": "nomadbooks:item/nether_nomad_book"
-    },
 	"overrides": [
 		{
 			"predicate": {
@@ -10,5 +7,10 @@
 			},
 			"model": "nomadbooks:item/nether_nomad_book_deployed"
 		}
-	]
+	],
+	"textures": {
+		"layer0": "nomadbooks:item/nether_nomad_book_color",
+		"layer1": "nomadbooks:item/nether_nomad_book_pages",
+		"layer2": "nomadbooks:item/nether_nomad_book_mark"
+	}
 }

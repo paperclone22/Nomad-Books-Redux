@@ -4,8 +4,10 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -41,17 +43,19 @@ public class NomadBookHeightUpgradeRecipe extends ShapelessRecipe {
     @Override
     public ItemStack assemble(CraftingContainer container, RegistryAccess registryAccess) {
         ItemStack book = findItem(container, stack -> stack.getItem() instanceof NomadBookItem);
-        List<ItemStack> pageStacks = container.getItems().stream()
-            .filter(stack -> stack.getItem().equals(ModItems.GRASS_PAGE)).toList();
+        List<Item> pageStacks = container.getItems().stream()
+            .map(ItemStack::getItem)
+            .filter(item -> item.equals(ModItems.GRASS_PAGE)).toList();
 
         if (book != null && !pageStacks.isEmpty() &&
             book.getOrCreateTag().getFloat(Constants.DEPLOYED) == 0.0f) { // Not deployed
-            int height = book.getOrCreateTagElement(Constants.MODID).getInt(Constants.HEIGHT);
-            book.getOrCreateTagElement(Constants.MODID).putInt(Constants.HEIGHT, height + pageStacks.size());
-            return book;
-        } else {
-            return ItemStack.EMPTY;
+            ItemStack ret = book.copy();
+            int height = ret.getOrCreateTagElement(Constants.MODID).getInt(Constants.HEIGHT);
+            CompoundTag tags = ret.getOrCreateTagElement(Constants.MODID);
+            tags.putInt(Constants.HEIGHT, height + pageStacks.size());
+            return ret;
         }
+        return ItemStack.EMPTY;
     }
 
     @Environment(EnvType.CLIENT)

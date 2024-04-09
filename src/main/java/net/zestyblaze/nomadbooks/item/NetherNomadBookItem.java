@@ -1,10 +1,11 @@
 package net.zestyblaze.nomadbooks.item;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.DyeableLeatherItem;
 import net.minecraft.world.item.ItemStack;
 import net.zestyblaze.nomadbooks.util.Constants;
 
-public class NetherNomadBookItem extends NomadBookItem {
+public class NetherNomadBookItem extends NomadBookItem implements DyeableLeatherItem {
 	public NetherNomadBookItem(Properties properties) {
 		super(properties);
 	}

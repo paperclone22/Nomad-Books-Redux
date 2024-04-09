@@ -16,8 +16,10 @@ public class Constants {
 	public static final String CAMP_POS = "CampPos";
 	public static final String AQUATIC_MEMBRANE = "aquatic_membrane";
 	public static final String FUNGI_SUPPORT = "fungi_support";
+	public static final String SPACIAL_DISPLACER = "spacial_displacer";
 	public static final String INK_PROGRESS = "InkProgress";
 	public static final String VISITED_BIOMES = "VisitedBiomes";
 	public static final String INK_GOAL = "InkGoal";
 	public static final String INKED = "Inked";
+	public static final String DISPLACED = "_displaced";
 }
