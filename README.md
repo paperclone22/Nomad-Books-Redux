@@ -2,7 +2,15 @@
 
 [//]: # (TODO take screenshots to replace the ones removed from the readme)
 
-[//]: # ([![img]&#40;https://img.shields.io/discord/292744693803122688?color=informational&label=Ladysnake&logo=Discord&#41;]&#40;https://ladysnake.glitch.me&#41;[![img]&#40;http://cf.way2muchnoise.eu/full_rats-mischief_downloads.svg&#41;]&#40;https://www.curseforge.com/minecraft/mc-mods/nomad-books&#41;[![img]&#40;http://cf.way2muchnoise.eu/versions/minecraft_nomad-books_latest.svg&#41;]&#40;https://www.curseforge.com/minecraft/mc-mods/nomad-books&#41;)
+![[Fabric Mod Loader](https://fabricmc.net/)](https://img.shields.io/badge/Mod%20Loader-Fabric-lightyellow)
+
+[//]: # (![[ImmediatelyFast]&#40;https://modrinth.com/mod/immediatelyfast&#41;]&#40;https://img.shields.io/badge/dynamic/json?color=158000&label=downloads&prefix=+%20&query=downloads&url=https://api.modrinth.com/v2/project/5ZwdcRci&logo=modrinth&#41;)
+
+[//]: # ([![img]&#40;https://img.shields.io/discord/292744693803122688?color=informational&label=Ladysnake&logo=Discord&#41;]&#40;https://ladysnake.glitch.me&#41;)
+
+[//]: # ([![img]&#40;http://cf.way2muchnoise.eu/full_rats-mischief_downloads.svg&#41;]&#40;https://www.curseforge.com/minecraft/mc-mods/nomad-books&#41;)
+
+[//]: # ([![img]&#40;http://cf.way2muchnoise.eu/versions/minecraft_nomad-books_latest.svg&#41;]&#40;https://www.curseforge.com/minecraft/mc-mods/nomad-books&#41;)
 
 **Nomad Books** is a Minecraft Fabric mod that introduces a solution for players that are always adventuring around their world. Nomad books and pages allow these players to store their camp in the form of an item and redeploy it whenever and wherever they wish.
 
@@ -12,7 +20,8 @@
 
 A nomad book is an item that can store a 3x1x3 sized camp. The book displays a campfire as indicator if the camp is deployed (campfire absent) or not (campfire visible).
 
-[//]: # (![CampfireIndicator]&#40;https://user-images.githubusercontent.com/83953120/121961233-700a9780-cd67-11eb-89a1-0a8febe0c533.png&#41;)
+![CampfireIndicator](./README.assets/deployed.jpg)
+![CampfireIndicator](./README.assets/retrieved.jpg)
 
 To **deploy** a camp simply find a flat spot with sufficient space blocked by nothing but plants (grass, flowers, vines,...) and snow and use the nomad book where you want the centre of your camp to be.
 
@@ -21,7 +30,7 @@ To **retrieve** a camp the player needs to be in a 10 block radius to the centre
 
 Shift-using with the nomad books will reveal the boundaries of the camp.
 
-[//]: # (![CampBoundaries]&#40;https://user-images.githubusercontent.com/83953120/121962532-2622b100-cd69-11eb-956b-0243b1ac366e.png&#41;)
+![CampBoundaries](./README.assets/boundaries.jpg)
 
 Default camp setup with boundaries toggled on.
 
@@ -29,15 +38,15 @@ Default camp setup with boundaries toggled on.
 
 #### Nomad Books
 
-Nomad Books can be crafted using three grass pages and a campfire.
+Nomad Books can be crafted using three grass pages and a campfire. A single book is guaranteed in the bonus chest loot.
 
-[//]: # (![NomadBookRecipe]&#40;https://user-images.githubusercontent.com/83953120/121963651-b6adc100-cd6a-11eb-8351-d6ba0a5cdd83.png&#41;)
+![NomadBookRecipe](./README.assets/craft-book.jpg)
 
 There will always be a Nomad Book appearing in the bonus chest (if enabled) at the start of the game.
 
 #### Grass Pages
 
-Grass pages - which allow the player to craft and upgrade nomad books - can be found with a **50%** chance in the loot chests of buried treasures, cartographer villagers,  dungeons, jungle temples, mineshafts and pillager outposts.
+Grass pages - which allow the player to craft and upgrade nomad books - can be found with a **50%** chance in the loot chests of buried treasures, cartographer villagers,  dungeons, jungle temples, mine shafts and pillager outposts.
 
 They can also be found in stronghold library chests in stacks of **0-3**.
 
@@ -46,13 +55,16 @@ Another way of obtaining grass pages is by dismantling Nomad Books in a crafting
 
 ### Upgrading
 
+Upgrades to the book can only be done while the camp is retrieved.
 
-Upgrades to the book can only be done while the camp is undeployed.
+##### Dye
+
+A book can be dyed using any dyes in the same way that armour can be dyed.
 
 ##### Height
 
 
-A book's height can be upgraded by shapelessly combining it with grass pages in a crafting inventory. Despite there being no limit to the height of a camp, the higher it gets the more difficult the search for a good spot may be since not only space that is actually used must be emptied of obstacles.
+A book's height can be upgraded by shapelessly combining it with **grass pages** in a crafting inventory. Despite there being no limit to the height of a camp, the higher it gets the more difficult the search for a good spot may be since not only space that is actually used must be emptied of obstacles.
 
 ##### Width
 
@@ -61,7 +73,7 @@ A book's width can be upgraded by using itinerant ink. Itinerant ink can be appl
 
 Upon application, a goal will be decided depending on the current width size. Progress towards this goal is made by visiting biomes that the book hasn't been to yet. Note that it does **not** have to be a new **kind** of biome.
 
-[//]: # (![ItinerantInkRecipe]&#40;https://user-images.githubusercontent.com/83953120/122669328-1964e980-d1bd-11eb-8d9c-a8afb516bcd5.png&#41;)
+![ItinerantInkRecipe](./README.assets/ink.png)
 
 #### Special Upgrades
 
@@ -73,21 +85,45 @@ Special upgrades are upgrades that only have to be applied once to a book and ad
 
 The Aquatic Membrane page (crafted as seen below) adds a membrane to your camp that will stop fluids from entering but lets the player as well as other entities pass, opening up the possibility to place your camp underwater!
 
-[//]: # (![AquaticMembraneRecipe]&#40;https://user-images.githubusercontent.com/83953120/121964948-91ba4d80-cd6c-11eb-93b0-c2df2f64022b.png&#41;)
+![AquaticMembraneRecipe](./README.assets/membrane-page.jpg)
 
 ##### Mycelium Page
 
 
 The Mycelium Page is a special page granting the Fungi Support upgrade. Fungi support allows the camp to be deployed on rough surfaces, as long as no obstacles interfere, by growing a special mushroom to fill up the missing floor blocks.
 
-[//]: # (![MyceliumPage]&#40;https://user-images.githubusercontent.com/83953120/121965215-fb3a5c00-cd6c-11eb-842f-719bc7cf46e6.png&#41;)
+![MyceliumPage](./README.assets/fungi-page.jpg)
+
+##### Spacial Displacer Page
+
+The Spacial Displacer Page allows the camp to fit in small places. Moves terrain blocks from cramped spaces into a pocket dimension; The blocks return when the camp is retrieved. Configurable blacklist. Please don't use this to grief other players.
+
+![displacer page](./README.assets/displacer-page.jpg)
 
 ##### Nether Nomad Book
 
 
 By combining the Nomad Book with a netherite ingot in an usual crafting grid the dropped item won't be destroyed in lava and instead swims up in it, similar to netherite ingots, tools and armour.
 
-[//]: # (![NetherNomadBookRecipe]&#40;https://user-images.githubusercontent.com/83953120/122669340-2550ab80-d1bd-11eb-826d-113af5ce1d42.png&#41;)
+![NetherNomadBookRecipe](./README.assets/nether-book.jpg)
+
+## Gallery
+
+![underwater membrane out](./README.assets/underwater-out.jpg)
+
+A view of  the aquatic membrane
+
+![underwater membrane in](./README.assets/underwater-in.jpg)
+
+Inside a camp with aquatic membrane
+
+![fungi support](./README.assets/mushroom.jpg)
+
+A camp on a desert well, held up by fungal support
+
+![displaced in cave](./README.assets/displaced-in-cave.jpg)
+
+A camp with spacial displacer upgrade, placed in an otherwise too small cave
 
 ## Dev
 

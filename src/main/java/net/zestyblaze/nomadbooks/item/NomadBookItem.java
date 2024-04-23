@@ -122,7 +122,7 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
         boolean hasSpacialDisplacer = tags.getList(Constants.UPGRADES, Tag.TAG_STRING).contains(StringTag.valueOf(Constants.SPACIAL_DISPLACER)); // 🟫
         // -----------------------------------
 
-        // Upgrades Checks and Func
+        // Upgrades, Checks and Func
         // check if there's enough space
         BoundingBox campVolume = BoundingBox.fromCorners(pos, pos.offset(width - 1, height - 1, width - 1));
         int spaceY;
