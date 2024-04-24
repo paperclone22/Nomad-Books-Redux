@@ -30,11 +30,22 @@ public class ModItems {
 	// Items self Registry (These static final fields don't need to be called in onInitialize)
 	public static final Item GRASS_PAGE = registerItem( "grass_page", new Item(new Item.Properties().rarity(Rarity.UNCOMMON)));
 	public static final Item NOMAD_BOOK = registerItem( "nomad_book", new NomadBookItem(new FabricItemSettings().maxCount(1).rarity(Rarity.RARE)));
-	public static final Item NETHER_NOMAD_BOOK = registerItem( "nether_nomad_book", new NetherNomadBookItem(new FabricItemSettings().maxCount(1).rarity(Rarity.RARE).fireproof()));
+	public static final Item NETHER_NOMAD_BOOK = registerItem( "nether_nomad_book", new NomadBookItem(new FabricItemSettings().maxCount(1).rarity(Rarity.RARE).fireproof()) {
+		@Override
+		public ItemStack getDefaultInstance() {
+			super.getDefaultInstance();
+			ItemStack itemStack = new ItemStack(this);
+			CompoundTag tags = itemStack.getOrCreateTagElement(Constants.MODID);
+			tags.putInt(Constants.HEIGHT, 3);
+			tags.putInt(Constants.WIDTH, 7);
+			tags.putString(Constants.STRUCTURE, NETHER_DEFAULT_STRUCTURE_PATH);
+			return itemStack;
+		}
+	});
 	public static final Item AQUATIC_MEMBRANE_PAGE = registerItem( "aquatic_membrane_page", new BookUpgradeItem(new FabricItemSettings().maxCount(1).rarity(Rarity.UNCOMMON), Constants.AQUATIC_MEMBRANE));
 	public static final Item MYCELIUM_PAGE = registerItem( "mycelium_page", new BookUpgradeItem(new FabricItemSettings().maxCount(1).rarity(Rarity.UNCOMMON), Constants.FUNGI_SUPPORT));
 	public static final Item SPACIAL_DISPLACER_PAGE = registerItem( "spacial_displacer_page", new BookUpgradeItem(new FabricItemSettings().maxCount(1).rarity(Rarity.UNCOMMON), Constants.SPACIAL_DISPLACER));
-	public static final Item CREATIVE_NOMAD_BOOK = registerItem( "creative_nomad_book", new NetherNomadBookItem(new FabricItemSettings().maxCount(1).rarity(Rarity.RARE).fireproof()) {
+	public static final Item CREATIVE_NOMAD_BOOK = registerItem( "creative_nomad_book", new NomadBookItem(new FabricItemSettings().maxCount(1).rarity(Rarity.RARE).fireproof()) {
 		@Override
 		public ItemStack getDefaultInstance() {
 			super.getDefaultInstance();

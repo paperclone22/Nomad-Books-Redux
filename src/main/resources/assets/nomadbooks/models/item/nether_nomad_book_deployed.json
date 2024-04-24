@@ -1,7 +1,7 @@
 {
 	"parent": "item/generated",
     "textures": {
-      "layer0": "nomadbooks:item/nether_nomad_book_color",
+      "layer0": "nomadbooks:item/nomad_book_coloredoverlay",
       "layer1": "nomadbooks:item/nether_nomad_book_pages"
     }
 }

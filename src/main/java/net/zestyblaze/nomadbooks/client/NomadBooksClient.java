@@ -16,7 +16,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.zestyblaze.nomadbooks.NomadBooks;
 import net.zestyblaze.nomadbooks.client.particle.CampfireLimitParticle;
 import net.zestyblaze.nomadbooks.item.ModItems;
-import net.zestyblaze.nomadbooks.item.NetherNomadBookItem;
 import net.zestyblaze.nomadbooks.item.NomadBookItem;
 import net.zestyblaze.nomadbooks.util.Constants;
 
@@ -37,11 +36,7 @@ public class NomadBooksClient implements ClientModInitializer {
         // Render the Color for Nomad Book items
         ColorProviderRegistry.ITEM.register(
             (stack, layer) -> layer != 0 ? -1 : ((NomadBookItem) stack.getItem()).getColor(stack),
-            ModItems.NOMAD_BOOK);
-
-        ColorProviderRegistry.ITEM.register( // I don't know why Nether variants aren't working the same as the regular
-            (stack, layer) -> layer != 1 ? -1 : ((NetherNomadBookItem) stack.getItem()).getColor(stack),
-            ModItems.NETHER_NOMAD_BOOK, ModItems.CREATIVE_NOMAD_BOOK);
+            ModItems.NOMAD_BOOK, ModItems.NETHER_NOMAD_BOOK, ModItems.CREATIVE_NOMAD_BOOK);
     }
 }
 

@@ -2,7 +2,7 @@
 
 [//]: # (TODO take screenshots to replace the ones removed from the readme)
 
-![[Fabric Mod Loader](https://fabricmc.net/)](https://img.shields.io/badge/Mod%20Loader-Fabric-lightyellow)
+[![Fabric Mod Loader](https://img.shields.io/badge/Mod%20Loader-Fabric-lightyellow)](https://fabricmc.net/)
 
 [//]: # (![[ImmediatelyFast]&#40;https://modrinth.com/mod/immediatelyfast&#41;]&#40;https://img.shields.io/badge/dynamic/json?color=158000&label=downloads&prefix=+%20&query=downloads&url=https://api.modrinth.com/v2/project/5ZwdcRci&logo=modrinth&#41;)
 
@@ -101,7 +101,6 @@ The Spacial Displacer Page allows the camp to fit in small places. Moves terrain
 ![displacer page](./README.assets/displacer-page.jpg)
 
 ##### Nether Nomad Book
-
 
 By combining the Nomad Book with a netherite ingot in an usual crafting grid the dropped item won't be destroyed in lava and instead swims up in it, similar to netherite ingots, tools and armour.
 
