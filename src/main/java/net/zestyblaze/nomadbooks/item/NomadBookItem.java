@@ -530,6 +530,11 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
         // Display upgrades
         displayUpgrades(tags, tooltip);
 
+        // Display fireproof
+        if (stack.getItem().isFireResistant()) {
+            tooltip.add(Component.translatable("item.nomadbooks.nomad_book.tooltip.fireproof").setStyle(Style.EMPTY.withItalic(true).withColor(ChatFormatting.RED)));
+        }
+
         // Display ink progress if inked
         displayInkProgress(tags, tooltip);
 

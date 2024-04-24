@@ -1,5 +1,26 @@
 # Nomad Books - Changelog
 
+### 1.2.2 - 1.20.1
+
+- fixed readme fabric badge.
+- Changed book color to more closely mimic leather dye colors.
+- Fixed Nether Nomad Book dye and colors.
+- Display Fireproof tooltip for nether books.
+- Re-textured the books again, for hopefully the last time.
+
+### Nomad Books Redux 1.2.1 - 1.20.1
+
+Fixed Nether Nomad Book Textures. They Now dye correctly.
+
+### Nomad Books Redux 1.2.0 - 1.20.1
+
+- First release of Nomad Books Redux. A fork of Nomad Books with new features.
+  - Replaced the old assets with new Creative Commons assets.
+  - Added a new upgrade page called Spacial Displacer: this page allow the camp to move terrain out of the way. This makes it much easier to place a camp in small spaces. When picking up the camp, the terrain returns, leaving no trace.
+  - Added dye recipes for the books. Now your books can have personality at a glance.
+  - Added a config file using MidnightLib
+  - Switch distance checks from Manhattan to radius
+
 ### Nomad Books 1.0.1 - 1.16.5
 - Replaced Nomad Books in the stronghold library loot pool with 0 to 3 grass pages
 - Nomad Books obtained in loot pools (starter chest and previously stronghold librairies) will now also be 3x1x3 instead of the previous 7x3x7

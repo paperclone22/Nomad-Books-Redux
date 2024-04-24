@@ -3,7 +3,8 @@
 	"textures": {
 		"layer0": "nomadbooks:item/nomad_book_coloredoverlay",
 		"layer1": "nomadbooks:item/nether_nomad_book_pages",
-		"layer2": "nomadbooks:item/nether_nomad_book_mark"
+		"layer2": "nomadbooks:item/nether_nomad_book_mark",
+		"layer3": "nomadbooks:item/nomad_book_clasp_closed"
 	},
 	"overrides": [
 		{

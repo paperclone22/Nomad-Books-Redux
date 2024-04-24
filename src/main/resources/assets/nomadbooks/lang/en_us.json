@@ -12,6 +12,7 @@
   "item.nomadbooks.nomad_book.tooltip.dimension": "Deployed in: %s",
   "item.nomadbooks.nomad_book.tooltip.boundaries_display": "Displaying camp boundaries",
   "item.nomadbooks.nomad_book.tooltip.itinerant_ink": "Itinerant Ink: %s/%s",
+  "item.nomadbooks.nomad_book.tooltip.fireproof": "Fireproof",
   "block.nomadbooks.membrane": "Membrane",
   "block.nomadbooks.nomad_mushroom_block": "Nomad Mushroom Block",
   "block.nomadbooks.nomad_mushroom_stem": "Nomad Mushroom Stem",

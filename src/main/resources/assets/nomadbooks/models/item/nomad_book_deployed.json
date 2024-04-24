@@ -2,6 +2,8 @@
 	"parent": "item/generated",
     "textures": {
       "layer0": "nomadbooks:item/nomad_book_coloredoverlay",
-      "layer1": "nomadbooks:item/nomad_book_page_edges"
+      "layer1": "nomadbooks:item/nomad_book_page_edges",
+      "layer2": "nomadbooks:item/nomad_book_mark_open",
+      "layer3": "nomadbooks:item/nomad_book_clasp_open"
     }
 }
