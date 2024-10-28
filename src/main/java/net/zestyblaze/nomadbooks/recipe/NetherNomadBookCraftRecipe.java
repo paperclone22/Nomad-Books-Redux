@@ -21,6 +21,7 @@ import net.zestyblaze.nomadbooks.item.NomadBookItem;
 import net.zestyblaze.nomadbooks.util.Constants;
 
 import static net.zestyblaze.nomadbooks.util.Helper.findItem;
+import static net.zestyblaze.nomadbooks.util.Helper.hasNoExtraItems;
 
 public class NetherNomadBookCraftRecipe extends ShapelessRecipe {
     public NetherNomadBookCraftRecipe(ResourceLocation resourceLocation, CraftingBookCategory category) {
@@ -40,7 +41,7 @@ public class NetherNomadBookCraftRecipe extends ShapelessRecipe {
     public boolean matches(CraftingContainer container, Level level) {
         ItemStack book = findItem(container, item -> item.getItem() instanceof NomadBookItem);
         ItemStack ingot = findItem(container, item -> item.is(Items.NETHERITE_INGOT));
-        return book != null && ingot != null && book.getOrCreateTag().getFloat(Constants.DEPLOYED) == 0.0f; // Not deployed
+        return book != null && hasNoExtraItems(container, 1) && ingot != null && book.getOrCreateTag().getFloat(Constants.DEPLOYED) == 0.0f; // Not deployed
     }
 
     @Override
@@ -48,7 +49,7 @@ public class NetherNomadBookCraftRecipe extends ShapelessRecipe {
         ItemStack book = findItem(container, item -> item.getItem() instanceof NomadBookItem);
         ItemStack ingot = findItem(container, item -> item.is(Items.NETHERITE_INGOT));
 
-        if (book != null && ingot != null && book.getOrCreateTag().getFloat(Constants.DEPLOYED) == 0.0f) { // Not deployed
+        if (book != null && hasNoExtraItems(container, 1) && ingot != null && book.getOrCreateTag().getFloat(Constants.DEPLOYED) == 0.0f) { // Not deployed
             ItemStack result = getCraftResult(); // perhaps on craft, increase the height and width of the input book ? Might want to wait until after adding "ender page" upgrade
             applyBookDataToResult(book, result);
             return result;

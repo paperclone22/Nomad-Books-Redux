@@ -1,13 +1,24 @@
 plugins {
-	id 'fabric-loom' version '1.5-SNAPSHOT'
-	id 'maven-publish'
-	id 'java-base'
+	id "java"
+	id "fabric-loom" version "1.8-SNAPSHOT"
+	id "maven-publish"
+	id "base"
 }
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+java {
+	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+	// if it is present.
+	// If you remove this line, sources will not be generated.
+	withSourcesJar()
 
-archivesBaseName = project.archives_base_name
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+}
+
+base {
+	archivesName = project.archives_base_name
+}
+
 version = project.mod_version
 group = project.maven_group
 
@@ -22,9 +33,9 @@ repositories {
 	mavenCentral()
 }
 
-fabricApi {
-	configureDataGeneration()
-}
+//fabricApi {
+//	configureDataGeneration()
+//}
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -62,7 +73,7 @@ java {
 
 jar {
 	from("LICENSE") {
-		rename { "${it}_${project.archivesBaseName}"}
+		rename { "${it}_${project.base.archivesName.get()}"}
 	}
 }
 

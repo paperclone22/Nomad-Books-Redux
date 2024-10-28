@@ -2,7 +2,9 @@
 
 [//]: # (TODO take screenshots to replace the ones removed from the readme)
 
+[![License](https://img.shields.io/badge/license-GPL%203.0-orange)](https://github.com/paperclone22/Nomad-Books-Redux?tab=GPL-3.0-2-ov-file)
 [![Fabric Mod Loader](https://img.shields.io/badge/Mod%20Loader-Fabric-lightyellow)](https://fabricmc.net/)
+[![Github Stars](https://img.shields.io/github/stars/paperclone22/Nomad-Books-Redux)](https://github.com/paperclone22/Nomad-Books-Redux)
 
 [//]: # (![[ImmediatelyFast]&#40;https://modrinth.com/mod/immediatelyfast&#41;]&#40;https://img.shields.io/badge/dynamic/json?color=158000&label=downloads&prefix=+%20&query=downloads&url=https://api.modrinth.com/v2/project/5ZwdcRci&logo=modrinth&#41;)
 
@@ -20,8 +22,8 @@
 
 A nomad book is an item that can store a 3x1x3 sized camp. The book displays a campfire as indicator if the camp is deployed (campfire absent) or not (campfire visible).
 
-![CampfireIndicator](./README.assets/deployed.jpg)
-![CampfireIndicator](./README.assets/retrieved.jpg)
+![deployed](./README.assets/retrieved.jpg)
+![retrieved](./README.assets/deployed.jpg)
 
 To **deploy** a camp simply find a flat spot with sufficient space blocked by nothing but plants (grass, flowers, vines,...) and snow and use the nomad book where you want the centre of your camp to be.
 
@@ -135,7 +137,7 @@ A camp with spacial displacer upgrade, placed in an otherwise too small cave
 ### How to Update or Port
 
 1. Close other projects in Intellij
-1. Update gradle [gradle docs](https://docs.gradle.org/current/userguide/upgrading_version_8.html): *eg.* `./gradlew wrapper --gradle-version 8.6`
+1. Update gradle [gradle docs](https://docs.gradle.org/current/userguide/upgrading_version_8.html): *eg.* `./gradlew wrapper --gradle-version 8.10.2`
 1. Update loom [fabric dev](https://fabricmc.net/develop/) *search for "recommended loom version" in the page*
 1. Update minecraft + fabric loader + fabric api + parchmentmc [fabric dev](https://fabricmc.net/develop/)
     - Update parchmentmc : org.parchmentmc.data:parchment-1.20.1:2023.09.03@zip (note migrateMappings is only useful for yarn) - [Getting Started](https://parchmentmc.org/docs/getting-started)

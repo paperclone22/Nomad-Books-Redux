@@ -38,8 +38,15 @@ public class NomadBookInkRecipe extends ShapelessRecipe {
 
         ItemStack book = findItem(container, stack -> stack.getItem() instanceof NomadBookItem);
 
+        int emptySlots = container.getItems().stream()
+            .filter(ItemStack::isEmpty)
+            .toList().size();
+        int allSlotsMinusFilledSlots = container.getContainerSize() - 1 - ingredients.size();
+        boolean hasNoExtraItems = emptySlots == allSlotsMinusFilledSlots;
+
         return book != null && ingredients.size() == 3 &&
-            ingredients.contains(Items.GHAST_TEAR) && ingredients.contains(Items.CHARCOAL) && ingredients.contains(Items.BLUE_DYE);
+            ingredients.contains(Items.GHAST_TEAR) && ingredients.contains(Items.CHARCOAL) && ingredients.contains(Items.BLUE_DYE)
+            && hasNoExtraItems;
     }
 
     @Override
@@ -50,8 +57,15 @@ public class NomadBookInkRecipe extends ShapelessRecipe {
 
         ItemStack book = findItem(container, stack -> stack.getItem() instanceof NomadBookItem);
 
+        int emptySlots = container.getItems().stream()
+            .filter(ItemStack::isEmpty)
+            .toList().size();
+        int allSlotsMinusFilledSlots = container.getContainerSize() - 1 - ingredients.size();
+        boolean hasNoExtraItems = emptySlots == allSlotsMinusFilledSlots;
+
         if (book != null && ingredients.size() == 3 &&
-            ingredients.contains(Items.GHAST_TEAR) && ingredients.contains(Items.CHARCOAL) && ingredients.contains(Items.BLUE_DYE)) {
+            ingredients.contains(Items.GHAST_TEAR) && ingredients.contains(Items.CHARCOAL) && ingredients.contains(Items.BLUE_DYE)
+            && hasNoExtraItems) {
             ItemStack ret = book.copy();
             int width = ret.getOrCreateTagElement(Constants.MODID).getInt(Constants.WIDTH);
             CompoundTag tags = ret.getOrCreateTagElement(Constants.MODID);

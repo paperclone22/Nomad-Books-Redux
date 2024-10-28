@@ -53,7 +53,7 @@ public class ModItems {
 			CompoundTag tags = itemStack.getOrCreateTagElement(Constants.MODID);
 			tags.putInt(Constants.HEIGHT, 15);
 			tags.putInt(Constants.WIDTH, 15);
-			tags.putString(Constants.STRUCTURE, DEFAULT_STRUCTURE_PATH);
+			tags.putString(Constants.STRUCTURE, NETHER_DEFAULT_STRUCTURE_PATH);
 			// upgrades
 			ListTag upgradeList = new ListTag();
 			upgradeList.add(StringTag.valueOf(Constants.AQUATIC_MEMBRANE));

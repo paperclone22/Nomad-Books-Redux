@@ -23,6 +23,7 @@ import net.zestyblaze.nomadbooks.item.NomadBookItem;
 import net.zestyblaze.nomadbooks.util.Constants;
 
 import static net.zestyblaze.nomadbooks.util.Helper.findItem;
+import static net.zestyblaze.nomadbooks.util.Helper.hasNoExtraItems;
 
 public class NomadBookUpgradeRecipe extends ShapelessRecipe {
     public NomadBookUpgradeRecipe(ResourceLocation resourceLocation, CraftingBookCategory category) {
@@ -36,7 +37,7 @@ public class NomadBookUpgradeRecipe extends ShapelessRecipe {
         ItemStack book = findItem(container, item -> item.getItem() instanceof NomadBookItem);
         ItemStack upgrade = findItem(container, item -> item.getItem() instanceof BookUpgradeItem);
 
-        return book != null && upgrade != null;
+        return book != null && upgrade != null && hasNoExtraItems(container, 1);
     }
 
     @Override
@@ -44,7 +45,7 @@ public class NomadBookUpgradeRecipe extends ShapelessRecipe {
         ItemStack book = findItem(container, item -> item.getItem() instanceof NomadBookItem);
         ItemStack upgrade = findItem(container, item -> item.getItem() instanceof BookUpgradeItem);
 
-        if (book != null && upgrade != null) {
+        if (book != null && upgrade != null && hasNoExtraItems(container, 1)) {
             ItemStack result = book.copy();
             CompoundTag tag = result.getOrCreateTagElement(Constants.MODID);
             ListTag upgradeList = tag.getList(Constants.UPGRADES, Tag.TAG_STRING);

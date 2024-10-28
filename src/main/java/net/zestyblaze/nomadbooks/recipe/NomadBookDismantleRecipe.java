@@ -19,6 +19,7 @@ import net.zestyblaze.nomadbooks.item.NomadBookItem;
 import net.zestyblaze.nomadbooks.util.Constants;
 
 import static net.zestyblaze.nomadbooks.util.Helper.findItem;
+import static net.zestyblaze.nomadbooks.util.Helper.hasNoExtraItems;
 
 public class NomadBookDismantleRecipe extends ShapelessRecipe {
 
@@ -31,7 +32,7 @@ public class NomadBookDismantleRecipe extends ShapelessRecipe {
     @Override
     public boolean matches(CraftingContainer container, Level level) {
         ItemStack book = findItem(container, item -> item.getItem() instanceof NomadBookItem);
-        return book != null && book.getOrCreateTag().getFloat(Constants.DEPLOYED) == 1.0f;  // is deployed
+        return book != null && hasNoExtraItems(container, 0) && book.getOrCreateTag().getFloat(Constants.DEPLOYED) == 1.0f;  // is deployed
     }
 
     @Override

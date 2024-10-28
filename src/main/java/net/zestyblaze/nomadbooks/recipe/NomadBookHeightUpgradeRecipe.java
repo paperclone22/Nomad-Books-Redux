@@ -22,6 +22,7 @@ import net.zestyblaze.nomadbooks.util.Constants;
 import java.util.List;
 
 import static net.zestyblaze.nomadbooks.util.Helper.findItem;
+import static net.zestyblaze.nomadbooks.util.Helper.hasNoExtraItems;
 
 public class NomadBookHeightUpgradeRecipe extends ShapelessRecipe {
     public NomadBookHeightUpgradeRecipe(ResourceLocation id, CraftingBookCategory category) {
@@ -36,7 +37,7 @@ public class NomadBookHeightUpgradeRecipe extends ShapelessRecipe {
         List<ItemStack> pageStacks = container.getItems().stream()
             .filter(stack -> stack.getItem().equals(ModItems.GRASS_PAGE)).toList();
 
-        return book != null && !pageStacks.isEmpty() &&
+        return book != null && !pageStacks.isEmpty() && hasNoExtraItems(container, pageStacks.size()) &&
             book.getOrCreateTag().getFloat(Constants.DEPLOYED) == 0.0f; // Not deployed
     }
 
@@ -47,7 +48,7 @@ public class NomadBookHeightUpgradeRecipe extends ShapelessRecipe {
             .map(ItemStack::getItem)
             .filter(item -> item.equals(ModItems.GRASS_PAGE)).toList();
 
-        if (book != null && !pageStacks.isEmpty() &&
+        if (book != null && !pageStacks.isEmpty() && hasNoExtraItems(container, pageStacks.size()) &&
             book.getOrCreateTag().getFloat(Constants.DEPLOYED) == 0.0f) { // Not deployed
             ItemStack ret = book.copy();
             int height = ret.getOrCreateTagElement(Constants.MODID).getInt(Constants.HEIGHT);

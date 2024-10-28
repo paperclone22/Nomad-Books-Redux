@@ -57,7 +57,8 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
     public static final int CAMP_RETRIEVAL_RADIUS = 20;
 
     public static final String DEFAULT_STRUCTURE_PATH = Constants.MODID + ":campfire3x1x3";
-    public static final String NETHER_DEFAULT_STRUCTURE_PATH = Constants.MODID + ":nethercampfire3x1x3";
+    public static final String NETHER_DEFAULT_STRUCTURE_PATH = Constants.MODID + ":nethercampfire7x3x7";
+    public static final String CREATIVE_DEFAULT_STRUCTURE_PATH = Constants.MODID + ":nethercampfire15x15x15";
 
     public NomadBookItem(Properties properties) {
         super(properties);
@@ -120,6 +121,8 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
         boolean hasAquaticMembrane = tags.getList(Constants.UPGRADES, Tag.TAG_STRING).contains(StringTag.valueOf(Constants.AQUATIC_MEMBRANE)); // 🟦
         boolean hasFungiSupport = tags.getList(Constants.UPGRADES, Tag.TAG_STRING).contains(StringTag.valueOf(Constants.FUNGI_SUPPORT)); // 🟪
         boolean hasSpacialDisplacer = tags.getList(Constants.UPGRADES, Tag.TAG_STRING).contains(StringTag.valueOf(Constants.SPACIAL_DISPLACER)); // 🟫
+        boolean hasDefaultStructure = tags.getString(Constants.STRUCTURE).equals(DEFAULT_STRUCTURE_PATH) || tags.getString(Constants.STRUCTURE).equals(NETHER_DEFAULT_STRUCTURE_PATH) || tags.getString(Constants.STRUCTURE).equals(CREATIVE_DEFAULT_STRUCTURE_PATH);
+        hasSpacialDisplacer = hasSpacialDisplacer && !hasDefaultStructure; // If book has Displacer Page, but still uses the Default structure. Then pretend It doesn't have the Displacer Page.
         // -----------------------------------
 
         // Upgrades, Checks and Func
@@ -128,7 +131,7 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
         int spaceY;
         int maxChecks = NomadBooksConfig.checksAboveOnDeploy;
         for (spaceY=0; spaceY <= maxChecks; spaceY++) {
-            if (hasEnoughSpace(world, campVolume.moved(0,spaceY,0),tags)) { // 🟦🟫 check
+            if (hasEnoughSpace(world, campVolume.moved(0,spaceY,0), hasAquaticMembrane, hasSpacialDisplacer)) { // 🟦🟫 check
                 pos = pos.above(spaceY);
                 campVolume = campVolume.moved(0,spaceY,0);
                 break;
@@ -154,7 +157,7 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
                     }
                 }
             }
-            if ( !hasEnoughSpace(world, campVolume,tags) ) {
+            if ( !hasEnoughSpace(world, campVolume, hasAquaticMembrane, hasSpacialDisplacer) ) {
                 player.displayClientMessage(Component.translatable("error.nomadbooks.no_space"), true);
                 return InteractionResult.FAIL;
             }
@@ -240,12 +243,12 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
         return BlockPos.betweenClosedStream(surface).noneMatch(bp -> isBlockReplaceable(world.getBlockState(bp)));
     }
 
-    private boolean hasEnoughSpace(Level world, BoundingBox campVolume, CompoundTag tags) {
+    private boolean hasEnoughSpace(Level world, BoundingBox campVolume, boolean hasAquatic, boolean hasDisplacer) {
         return BlockPos.betweenClosedStream(campVolume).allMatch(bp -> {
             BlockState bs = world.getBlockState(bp);
             return isBlockReplaceable(bs)
-                || isBlockUnderwaterReplaceable(bs) && tags.getList(Constants.UPGRADES, Tag.TAG_STRING).contains(StringTag.valueOf(Constants.AQUATIC_MEMBRANE))
-                || isBlockDisplaceable(bs) && tags.getList(Constants.UPGRADES, Tag.TAG_STRING).contains(StringTag.valueOf(Constants.SPACIAL_DISPLACER));
+                || isBlockUnderwaterReplaceable(bs) && hasAquatic
+                || isBlockDisplaceable(bs) && hasDisplacer;
         });
     }
 
@@ -329,7 +332,7 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
         if (tags.getList(Constants.UPGRADES, Tag.TAG_STRING).contains(StringTag.valueOf(Constants.SPACIAL_DISPLACER))
         && !world.isClientSide()) {
             // Place the structure
-            placeStructure(world, structurePath, pos, width); // should I add checks for if the player upgraded the camp size?
+            placeStructure(world, structurePath, pos, width); // TODO should I add checks for if the player upgraded the camp size?
         }
     }
 
@@ -378,7 +381,7 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
      */
     private boolean createStructureIfDefaultOrRetrieve(CompoundTag tags, String structurePath, Player user, Level world, BlockPos pos, int width, int height) {
         // Check if the structure path needs to be generated
-        if (structurePath.equals(DEFAULT_STRUCTURE_PATH) || structurePath.equals(NETHER_DEFAULT_STRUCTURE_PATH)) {
+        if (structurePath.equals(DEFAULT_STRUCTURE_PATH) || structurePath.equals(NETHER_DEFAULT_STRUCTURE_PATH) || structurePath.equals(CREATIVE_DEFAULT_STRUCTURE_PATH)) {
             List<String> path = Arrays.asList(user.getUUID().toString(), String.valueOf(System.currentTimeMillis()));
             structurePath = new ResourceLocation(Constants.MODID, Strings.join(path, "/")).toString();
             NomadBooks.LOGGER.info("Creating Structure (Server thread): " + structurePath);

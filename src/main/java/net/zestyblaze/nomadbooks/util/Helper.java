@@ -5,6 +5,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 public class Helper {
@@ -28,6 +29,17 @@ public class Helper {
 	public static BoundingBox convertAABBtoBoundingBox(AABB entityBB) {
 		return new BoundingBox((int) Math.floor(entityBB.minX), (int) Math.floor(entityBB.minY), (int) Math.floor(entityBB.minZ),
 				(int) Math.ceil(entityBB.maxX), (int) Math.ceil(entityBB.maxY), (int) Math.ceil(entityBB.maxZ));
+	}
+
+	/**
+	 * Return true if all extra crafting slots are empty
+	 */
+	public static boolean hasNoExtraItems(CraftingContainer container, int myDesiredItemsAmount) {
+        int emptySlots = container.getItems().stream()
+            .filter(ItemStack::isEmpty)
+            .toList().size();
+        int allSlotsMinusFilledSlots = container.getContainerSize() - 1 - myDesiredItemsAmount;
+        return emptySlots == allSlotsMinusFilledSlots;
 	}
 
 }
