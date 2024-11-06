@@ -31,3 +31,9 @@ bin/
 # fabric
 
 run/
+
+# Me
+*.xcf
+*.kra
+*.zip
+

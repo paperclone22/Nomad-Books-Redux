@@ -1,8 +1,8 @@
 plugins {
-	id "java"
+//	id "java"
 	id "fabric-loom" version "1.8-SNAPSHOT"
 	id "maven-publish"
-	id "base"
+//	id "base"
 }
 
 java {
@@ -16,10 +16,10 @@ java {
 }
 
 base {
-	archivesName = project.archives_base_name
+	archivesName = project.name
 }
 
-version = project.mod_version
+version = "${project.mod_version}-${project.minecraft_version}"
 group = project.maven_group
 
 repositories {
@@ -28,7 +28,21 @@ repositories {
 		url "https://maven.parchmentmc.org"
 	}
 	maven {
-		url = "https://api.modrinth.com/maven"
+		name "Modrinth"
+		url "https://api.modrinth.com/maven"
+	}
+//	maven {
+//		name "Shedaniel | Cloth Config"
+//		url "https://maven.shedaniel.me/"
+//	}
+	maven {
+		name "terraformersmc"
+		url "https://maven.terraformersmc.com/releases/"
+	}
+
+	maven {
+		name 'Xander Maven'
+		url 'https://maven.isxander.dev/releases'
 	}
 	mavenCentral()
 }
@@ -45,7 +59,7 @@ dependencies {
 	//Parchment
 	mappings loom.layered() {
 		officialMojangMappings()
-		parchment("org.parchmentmc.data:parchment-${project.parchment_version}@zip")
+		parchment("org.parchmentmc.data:parchment-${project.parchment_minecraft_version}:${project.parchment_version}@zip")
 	}
 	// MidnightLib config
 	modImplementation "maven.modrinth:midnightlib:${project.midnightlib_version}"
