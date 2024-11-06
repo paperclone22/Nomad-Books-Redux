@@ -1,10 +1,10 @@
 package net.zestyblaze.nomadbooks.util;
 
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.block.Block;
+import net.minecraft.item.Item;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.util.Identifier;
 
 public class ModTags {
 
@@ -17,7 +17,7 @@ public class ModTags {
 		public static final TagKey<Block> IS_NOT_DISPLACABLE = createTag("terrain_not_displaceable");
 
 		private static TagKey<Block> createTag(String name) {
-			return TagKey.create(BuiltInRegistries.BLOCK.key(), new ResourceLocation(Constants.MODID, name));
+			return TagKey.of(Registries.BLOCK.getKey(), new Identifier(Constants.MODID, name));
 		}
 	}
 
@@ -26,7 +26,7 @@ public class ModTags {
 		private Items() {}
 
 		private static TagKey<Item> createTag(String name) {
-			return TagKey.create(BuiltInRegistries.ITEM.key(), new ResourceLocation(Constants.MODID, name));
+			return TagKey.of(Registries.ITEM.getKey(), new Identifier(Constants.MODID, name));
 		}
 	}
 

@@ -2,18 +2,18 @@ package net.zestyblaze.nomadbooks.recipe;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
-import net.minecraft.world.level.Level;
+import net.minecraft.inventory.RecipeInputInventory;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.RecipeSerializer;
+import net.minecraft.recipe.ShapelessRecipe;
+import net.minecraft.recipe.book.CraftingRecipeCategory;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.world.World;
 import net.zestyblaze.nomadbooks.NomadBooks;
 import net.zestyblaze.nomadbooks.item.ModItems;
 import net.zestyblaze.nomadbooks.item.NomadBookItem;
@@ -25,34 +25,34 @@ import static net.zestyblaze.nomadbooks.util.Helper.findItem;
 import static net.zestyblaze.nomadbooks.util.Helper.hasNoExtraItems;
 
 public class NomadBookHeightUpgradeRecipe extends ShapelessRecipe {
-    public NomadBookHeightUpgradeRecipe(ResourceLocation id, CraftingBookCategory category) {
+    public NomadBookHeightUpgradeRecipe(Identifier id, CraftingRecipeCategory category) {
         // I decided to switch to single page. Multiple pages still works, but it shows just 1 in the Recipe book (BUT IT SHOWS AT ALL)
-        super(id, "", category, new ItemStack(ModItems.NOMAD_BOOK), NonNullList.of(Ingredient.EMPTY,
-            Ingredient.of(ModItems.NOMAD_BOOK.getDefaultInstance(), ModItems.NETHER_NOMAD_BOOK.getDefaultInstance()), Ingredient.of(ModItems.GRASS_PAGE)));
+        super(id, "", category, new ItemStack(ModItems.NOMAD_BOOK), DefaultedList.copyOf(Ingredient.EMPTY,
+            Ingredient.ofStacks(ModItems.NOMAD_BOOK.getDefaultStack(), ModItems.NETHER_NOMAD_BOOK.getDefaultStack()), Ingredient.ofItems(ModItems.GRASS_PAGE)));
     }
 
     @Override
-    public boolean matches(CraftingContainer container, Level level) {
+    public boolean matches(RecipeInputInventory container, World level) {
         ItemStack book = findItem(container, stack -> stack.getItem() instanceof NomadBookItem);
-        List<ItemStack> pageStacks = container.getItems().stream()
+        List<ItemStack> pageStacks = container.getInputStacks().stream()
             .filter(stack -> stack.getItem().equals(ModItems.GRASS_PAGE)).toList();
 
         return book != null && !pageStacks.isEmpty() && hasNoExtraItems(container, pageStacks.size()) &&
-            book.getOrCreateTag().getFloat(Constants.DEPLOYED) == 0.0f; // Not deployed
+            book.getOrCreateNbt().getFloat(Constants.DEPLOYED) == 0.0f; // Not deployed
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer container, RegistryAccess registryAccess) {
+    public ItemStack craft(RecipeInputInventory container, DynamicRegistryManager registryAccess) {
         ItemStack book = findItem(container, stack -> stack.getItem() instanceof NomadBookItem);
-        List<Item> pageStacks = container.getItems().stream()
+        List<Item> pageStacks = container.getInputStacks().stream()
             .map(ItemStack::getItem)
             .filter(item -> item.equals(ModItems.GRASS_PAGE)).toList();
 
         if (book != null && !pageStacks.isEmpty() && hasNoExtraItems(container, pageStacks.size()) &&
-            book.getOrCreateTag().getFloat(Constants.DEPLOYED) == 0.0f) { // Not deployed
+            book.getOrCreateNbt().getFloat(Constants.DEPLOYED) == 0.0f) { // Not deployed
             ItemStack ret = book.copy();
-            int height = ret.getOrCreateTagElement(Constants.MODID).getInt(Constants.HEIGHT);
-            CompoundTag tags = ret.getOrCreateTagElement(Constants.MODID);
+            int height = ret.getOrCreateSubNbt(Constants.MODID).getInt(Constants.HEIGHT);
+            NbtCompound tags = ret.getOrCreateSubNbt(Constants.MODID);
             tags.putInt(Constants.HEIGHT, height + pageStacks.size());
             return ret;
         }
@@ -61,7 +61,7 @@ public class NomadBookHeightUpgradeRecipe extends ShapelessRecipe {
 
     @Environment(EnvType.CLIENT)
     @Override
-    public boolean canCraftInDimensions(int width, int height) {
+    public boolean fits(int width, int height) {
         return width * height >= 2;
     }
 

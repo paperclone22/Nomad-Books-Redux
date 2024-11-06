@@ -1,43 +1,43 @@
 package net.zestyblaze.nomadbooks.block;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.StainedGlassBlock;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.StainedGlassBlock;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.DyeColor;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 
 public class MembraneBlock extends StainedGlassBlock {
-    public MembraneBlock(Properties properties) {
+    public MembraneBlock(Settings properties) {
         super(DyeColor.PURPLE, properties);
     }
 
     @Override
     @Deprecated(since = "2024-03-18")
-    public void entityInside(BlockState state, Level world, BlockPos pos, Entity entity) {
-        if (entity instanceof Projectile) {
-            entity.setDeltaMovement(entity.getDeltaMovement().x()/2, entity.getDeltaMovement().y()/2, entity.getDeltaMovement().z()/2);
+    public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
+        if (entity instanceof ProjectileEntity) {
+            entity.setVelocity(entity.getVelocity().getX()/2, entity.getVelocity().getY()/2, entity.getVelocity().getZ()/2);
         }
-        if (world.getGameTime() % 15 == 0 && entity.getType() != EntityType.ITEM) {
-            world.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.BLOCKS, 1f, 1f);
+        if (world.getTime() % 15 == 0 && entity.getType() != EntityType.ITEM) {
+            world.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.BLOCK_HONEY_BLOCK_SLIDE, SoundCategory.BLOCKS, 1f, 1f);
         }
     }
 
     @Override
-    public boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
+    public boolean isTransparent(BlockState state, BlockView level, BlockPos pos) {
         return true;
     }
 
     @Override
-    public void destroy(LevelAccessor level, BlockPos pos, BlockState state) {
-        super.destroy(level, pos, state);
-        level.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
+    public void onBroken(WorldAccess level, BlockPos pos, BlockState state) {
+        super.onBroken(level, pos, state);
+        level.setBlockState(pos, Blocks.WATER.getDefaultState(), 3);
     }
 }

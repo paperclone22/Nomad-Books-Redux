@@ -1,17 +1,17 @@
 package net.zestyblaze.nomadbooks.block;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.BlockView;
 
 public class NomadMushroomStemBlock extends NomadMushroomBlock {
-    public NomadMushroomStemBlock(Properties properties) {
+    public NomadMushroomStemBlock(Settings properties) {
         super(properties);
-        this.registerDefaultState(this.getStateDefinition().any().setValue(NORTH, true).setValue(EAST, true).setValue(SOUTH, true).setValue(WEST, true).setValue(UP, true).setValue(DOWN, true));
+        this.setDefaultState(this.getStateManager().getDefaultState().with(NORTH, true).with(EAST, true).with(SOUTH, true).with(WEST, true).with(UP, true).with(DOWN, true));
     }
 
     @Override
-    public boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
+    public boolean isTransparent(BlockState state, BlockView level, BlockPos pos) {
         return true;
     }
 }

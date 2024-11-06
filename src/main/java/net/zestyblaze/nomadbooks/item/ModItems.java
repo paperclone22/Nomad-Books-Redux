@@ -2,21 +2,21 @@ package net.zestyblaze.nomadbooks.item;
 
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.Rarity;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.Rarity;
 import net.zestyblaze.nomadbooks.NomadBooks;
 import net.zestyblaze.nomadbooks.util.Constants;
 
@@ -28,14 +28,14 @@ public class ModItems {
 	private ModItems() {}
 
 	// Items self Registry (These static final fields don't need to be called in onInitialize)
-	public static final Item GRASS_PAGE = registerItem( "grass_page", new Item(new Item.Properties().rarity(Rarity.UNCOMMON)));
+	public static final Item GRASS_PAGE = registerItem( "grass_page", new Item(new Item.Settings().rarity(Rarity.UNCOMMON)));
 	public static final Item NOMAD_BOOK = registerItem( "nomad_book", new NomadBookItem(new FabricItemSettings().maxCount(1).rarity(Rarity.RARE)));
 	public static final Item NETHER_NOMAD_BOOK = registerItem( "nether_nomad_book", new NomadBookItem(new FabricItemSettings().maxCount(1).rarity(Rarity.RARE).fireproof()) {
 		@Override
-		public ItemStack getDefaultInstance() {
-			super.getDefaultInstance();
+		public ItemStack getDefaultStack() {
+			super.getDefaultStack();
 			ItemStack itemStack = new ItemStack(this);
-			CompoundTag tags = itemStack.getOrCreateTagElement(Constants.MODID);
+			NbtCompound tags = itemStack.getOrCreateSubNbt(Constants.MODID);
 			tags.putInt(Constants.HEIGHT, 3);
 			tags.putInt(Constants.WIDTH, 7);
 			tags.putString(Constants.STRUCTURE, NETHER_DEFAULT_STRUCTURE_PATH);
@@ -47,18 +47,18 @@ public class ModItems {
 	public static final Item SPACIAL_DISPLACER_PAGE = registerItem( "spacial_displacer_page", new BookUpgradeItem(new FabricItemSettings().maxCount(1).rarity(Rarity.UNCOMMON), Constants.SPACIAL_DISPLACER));
 	public static final Item CREATIVE_NOMAD_BOOK = registerItem( "creative_nomad_book", new NomadBookItem(new FabricItemSettings().maxCount(1).rarity(Rarity.RARE).fireproof()) {
 		@Override
-		public ItemStack getDefaultInstance() {
-			super.getDefaultInstance();
+		public ItemStack getDefaultStack() {
+			super.getDefaultStack();
 			ItemStack itemStack = new ItemStack(this);
-			CompoundTag tags = itemStack.getOrCreateTagElement(Constants.MODID);
+			NbtCompound tags = itemStack.getOrCreateSubNbt(Constants.MODID);
 			tags.putInt(Constants.HEIGHT, 15);
 			tags.putInt(Constants.WIDTH, 15);
 			tags.putString(Constants.STRUCTURE, NETHER_DEFAULT_STRUCTURE_PATH);
 			// upgrades
-			ListTag upgradeList = new ListTag();
-			upgradeList.add(StringTag.valueOf(Constants.AQUATIC_MEMBRANE));
-			upgradeList.add(StringTag.valueOf(Constants.FUNGI_SUPPORT));
-			upgradeList.add(StringTag.valueOf(Constants.SPACIAL_DISPLACER));
+			NbtList upgradeList = new NbtList();
+			upgradeList.add(NbtString.of(Constants.AQUATIC_MEMBRANE));
+			upgradeList.add(NbtString.of(Constants.FUNGI_SUPPORT));
+			upgradeList.add(NbtString.of(Constants.SPACIAL_DISPLACER));
 			tags.put(Constants.UPGRADES, upgradeList);
 			return itemStack;
 		}
@@ -67,29 +67,29 @@ public class ModItems {
 	// Mod Block Items
 	public static Block registerBlock(String name, Block block) {
 		registerBlockItem(name, block);
-		return Blocks.register(new ResourceLocation(Constants.MODID, name).toString(), block);
+		return Blocks.register(new Identifier(Constants.MODID, name).toString(), block);
 	}
 
 	private static void registerBlockItem(String name, Block block) {
-		Items.registerItem( new ResourceLocation(Constants.MODID, name), new BlockItem(block, new FabricItemSettings()));
+		Items.register( new Identifier(Constants.MODID, name), new BlockItem(block, new FabricItemSettings()));
 	}
 
 	// Creative Tab
-	public static	final CreativeModeTab NOMAD_BOOKS_TAB_BUILD = FabricItemGroup.builder() // yeah I know, this should have its own class to be consistent
+	public static	final ItemGroup NOMAD_BOOKS_TAB_BUILD = FabricItemGroup.builder() // yeah I know, this should have its own class to be consistent
 			.icon(() -> new ItemStack(ModItems.NOMAD_BOOK))
-			.title(Component.translatable("item.nomadbooks.nomad_book"))
-			.displayItems((context, entries) -> {
-				entries.accept(ModItems.GRASS_PAGE);
-				entries.accept(ModItems.NOMAD_BOOK.getDefaultInstance());
-				entries.accept(ModItems.NETHER_NOMAD_BOOK.getDefaultInstance());
-				entries.accept(ModItems.AQUATIC_MEMBRANE_PAGE);
-				entries.accept(ModItems.MYCELIUM_PAGE);
-				entries.accept(ModItems.SPACIAL_DISPLACER_PAGE);
-				entries.accept(ModItems.CREATIVE_NOMAD_BOOK.getDefaultInstance());
+			.displayName(Text.translatable("item.nomadbooks.nomad_book"))
+			.entries((context, entries) -> {
+				entries.add(ModItems.GRASS_PAGE);
+				entries.add(ModItems.NOMAD_BOOK.getDefaultStack());
+				entries.add(ModItems.NETHER_NOMAD_BOOK.getDefaultStack());
+				entries.add(ModItems.AQUATIC_MEMBRANE_PAGE);
+				entries.add(ModItems.MYCELIUM_PAGE);
+				entries.add(ModItems.SPACIAL_DISPLACER_PAGE);
+				entries.add(ModItems.CREATIVE_NOMAD_BOOK.getDefaultStack());
 				//  See: https://youtu.be/5VEh1dDngd8?si=5B9WQH_VFxQtILjq
-				entries.accept(NomadBooks.MEMBRANE);
-				entries.accept(NomadBooks.NOMAD_MUSHROOM_BLOCK);
-				entries.accept(NomadBooks.NOMAD_MUSHROOM_STEM);
+				entries.add(NomadBooks.MEMBRANE);
+				entries.add(NomadBooks.NOMAD_MUSHROOM_BLOCK);
+				entries.add(NomadBooks.NOMAD_MUSHROOM_STEM);
 			})
 			.build();
 
@@ -100,7 +100,7 @@ public class ModItems {
 	 * @return net.minecraft.world.item.Item
 	 */
 	public static Item registerItem(String name, Item item) {
-		return Registry.register(BuiltInRegistries.ITEM, new ResourceLocation(Constants.MODID, name), item);
+		return Registry.register(Registries.ITEM, new Identifier(Constants.MODID, name), item);
 	}
 
 	/**
@@ -111,6 +111,6 @@ public class ModItems {
 		NomadBooks.LOGGER.info(Constants.MODID + ": Registering Items");
 
 		// Creative Tab Registry
-		Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, Constants.MODID, NOMAD_BOOKS_TAB_BUILD);
+		Registry.register(Registries.ITEM_GROUP, Constants.MODID, NOMAD_BOOKS_TAB_BUILD);
 	}
 }

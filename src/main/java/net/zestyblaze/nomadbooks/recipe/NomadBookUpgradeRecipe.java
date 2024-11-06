@@ -2,20 +2,20 @@ package net.zestyblaze.nomadbooks.recipe;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
-import net.minecraft.world.level.Level;
+import net.minecraft.inventory.RecipeInputInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.RecipeSerializer;
+import net.minecraft.recipe.ShapelessRecipe;
+import net.minecraft.recipe.book.CraftingRecipeCategory;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.world.World;
 import net.zestyblaze.nomadbooks.NomadBooks;
 import net.zestyblaze.nomadbooks.item.BookUpgradeItem;
 import net.zestyblaze.nomadbooks.item.ModItems;
@@ -26,14 +26,14 @@ import static net.zestyblaze.nomadbooks.util.Helper.findItem;
 import static net.zestyblaze.nomadbooks.util.Helper.hasNoExtraItems;
 
 public class NomadBookUpgradeRecipe extends ShapelessRecipe {
-    public NomadBookUpgradeRecipe(ResourceLocation resourceLocation, CraftingBookCategory category) {
+    public NomadBookUpgradeRecipe(Identifier resourceLocation, CraftingRecipeCategory category) {
         // TODO make a Tag for the upgrade pages
         super(resourceLocation, "", category, new ItemStack(ModItems.NOMAD_BOOK),
-            NonNullList.of(Ingredient.EMPTY, Ingredient.of(ModItems.NOMAD_BOOK.getDefaultInstance(), ModItems.NETHER_NOMAD_BOOK.getDefaultInstance()), Ingredient.of(ModItems.AQUATIC_MEMBRANE_PAGE, ModItems.MYCELIUM_PAGE, ModItems.SPACIAL_DISPLACER_PAGE)));
+            DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofStacks(ModItems.NOMAD_BOOK.getDefaultStack(), ModItems.NETHER_NOMAD_BOOK.getDefaultStack()), Ingredient.ofItems(ModItems.AQUATIC_MEMBRANE_PAGE, ModItems.MYCELIUM_PAGE, ModItems.SPACIAL_DISPLACER_PAGE)));
     }
 
     @Override
-    public boolean matches(CraftingContainer container, Level level) {
+    public boolean matches(RecipeInputInventory container, World level) {
         ItemStack book = findItem(container, item -> item.getItem() instanceof NomadBookItem);
         ItemStack upgrade = findItem(container, item -> item.getItem() instanceof BookUpgradeItem);
 
@@ -41,17 +41,17 @@ public class NomadBookUpgradeRecipe extends ShapelessRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer container, RegistryAccess registryAccess) {
+    public ItemStack craft(RecipeInputInventory container, DynamicRegistryManager registryAccess) {
         ItemStack book = findItem(container, item -> item.getItem() instanceof NomadBookItem);
         ItemStack upgrade = findItem(container, item -> item.getItem() instanceof BookUpgradeItem);
 
         if (book != null && upgrade != null && hasNoExtraItems(container, 1)) {
             ItemStack result = book.copy();
-            CompoundTag tag = result.getOrCreateTagElement(Constants.MODID);
-            ListTag upgradeList = tag.getList(Constants.UPGRADES, Tag.TAG_STRING);
+            NbtCompound tag = result.getOrCreateSubNbt(Constants.MODID);
+            NbtList upgradeList = tag.getList(Constants.UPGRADES, NbtElement.STRING_TYPE);
 
-            if (!upgradeList.contains(StringTag.valueOf(getUpgrade(upgrade)))) {
-                upgradeList.add(StringTag.valueOf(getUpgrade(upgrade)));
+            if (!upgradeList.contains(NbtString.of(getUpgrade(upgrade)))) {
+                upgradeList.add(NbtString.of(getUpgrade(upgrade)));
                 tag.put(Constants.UPGRADES, upgradeList);
             }
 
@@ -67,7 +67,7 @@ public class NomadBookUpgradeRecipe extends ShapelessRecipe {
 
     @Environment(EnvType.CLIENT)
     @Override
-    public boolean canCraftInDimensions(int width, int height) {
+    public boolean fits(int width, int height) {
         return width * height >= 2;
     }
 

@@ -2,20 +2,20 @@ package net.zestyblaze.nomadbooks.datagen;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.block.Blocks;
+import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.tag.BlockTags;
 import net.zestyblaze.nomadbooks.util.ModTags;
 
 import java.util.concurrent.CompletableFuture;
 
 public class ModBlockTagProvider extends FabricTagProvider.BlockTagProvider {
-	public ModBlockTagProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
+	public ModBlockTagProvider(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
 		super(output, registriesFuture);
 	}
 
 	@Override
-	protected void addTags(HolderLookup.Provider arg) { // TODO add a config to disable the use of these hard-coded lists. OR heck just move these lists to the config
+	protected void configure(RegistryWrapper.WrapperLookup arg) { // TODO add a config to disable the use of these hard-coded lists. OR heck just move these lists to the config
 		getOrCreateTagBuilder(ModTags.Blocks.IS_AIR_REPLACEABLE)
 				.add(Blocks.AIR, Blocks.CAVE_AIR, Blocks.VOID_AIR, Blocks.CRIMSON_ROOTS, Blocks.DEAD_BUSH, Blocks.FERN, Blocks.FIRE, Blocks.GLOW_LICHEN, Blocks.GRASS, Blocks.HANGING_ROOTS, Blocks.LARGE_FERN, Blocks.LAVA, Blocks.LIGHT, Blocks.NETHER_SPROUTS, Blocks.SNOW, Blocks.SOUL_FIRE, Blocks.STRUCTURE_VOID, Blocks.TALL_GRASS, Blocks.VINE, Blocks.WARPED_ROOTS)
 				.forceAddTag(BlockTags.REPLACEABLE)

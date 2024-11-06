@@ -3,18 +3,18 @@ package net.zestyblaze.nomadbooks.recipe;
 import com.google.common.collect.Lists;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.ShapedRecipe;
-import net.minecraft.world.level.Level;
+import net.minecraft.inventory.RecipeInputInventory;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.RecipeSerializer;
+import net.minecraft.recipe.ShapedRecipe;
+import net.minecraft.recipe.book.CraftingRecipeCategory;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.world.World;
 import net.zestyblaze.nomadbooks.item.ModItems;
 import net.zestyblaze.nomadbooks.item.NomadBookItem;
 import net.zestyblaze.nomadbooks.util.Constants;
@@ -35,21 +35,21 @@ public class NomadBookCraftRecipe extends ShapedRecipe {
 
     public static ItemStack getCraftResult() {
         ItemStack result = new ItemStack(ModItems.NOMAD_BOOK);
-        result.getOrCreateTagElement(Constants.MODID).putInt(Constants.HEIGHT, 1);
-        result.getOrCreateTagElement(Constants.MODID).putInt(Constants.WIDTH, 3);
-        result.getOrCreateTagElement(Constants.MODID).putString(Constants.STRUCTURE, NomadBookItem.DEFAULT_STRUCTURE_PATH);
+        result.getOrCreateSubNbt(Constants.MODID).putInt(Constants.HEIGHT, 1);
+        result.getOrCreateSubNbt(Constants.MODID).putInt(Constants.WIDTH, 3);
+        result.getOrCreateSubNbt(Constants.MODID).putString(Constants.STRUCTURE, NomadBookItem.DEFAULT_STRUCTURE_PATH);
 
         return result;
     }
 
-    public NomadBookCraftRecipe(ResourceLocation resourceLocation, CraftingBookCategory category) {
-        super(resourceLocation, "", category, 3, 2, NonNullList.of(Ingredient.EMPTY,
-            Ingredient.of(Items.AIR), Ingredient.of(Items.CAMPFIRE), Ingredient.of(Items.AIR),
-            Ingredient.of(ModItems.GRASS_PAGE), Ingredient.of(ModItems.GRASS_PAGE), Ingredient.of(ModItems.GRASS_PAGE)), getCraftResult());
+    public NomadBookCraftRecipe(Identifier resourceLocation, CraftingRecipeCategory category) {
+        super(resourceLocation, "", category, 3, 2, DefaultedList.copyOf(Ingredient.EMPTY,
+            Ingredient.ofItems(Items.AIR), Ingredient.ofItems(Items.CAMPFIRE), Ingredient.ofItems(Items.AIR),
+            Ingredient.ofItems(ModItems.GRASS_PAGE), Ingredient.ofItems(ModItems.GRASS_PAGE), Ingredient.ofItems(ModItems.GRASS_PAGE)), getCraftResult());
     }
 
     @Override
-    public boolean matches(CraftingContainer container, Level level) {
+    public boolean matches(RecipeInputInventory container, World level) {
         if(!super.matches(container, level)) {
             return false;
         }
@@ -57,7 +57,7 @@ public class NomadBookCraftRecipe extends ShapedRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer container, RegistryAccess registryAccess) {
+    public ItemStack craft(RecipeInputInventory container, DynamicRegistryManager registryAccess) {
         if (isNomadRecipe(container)) {
             return getCraftResult();
         } else {
@@ -65,22 +65,22 @@ public class NomadBookCraftRecipe extends ShapedRecipe {
         }
     }
 
-    private boolean isNomadRecipe(CraftingContainer container) {
+    private boolean isNomadRecipe(RecipeInputInventory container) {
         List<Item> list = Lists.newArrayList();
-        for(int i = 0; i < container.getContainerSize(); ++i) {
-            list.add(container.getItem(i).getItem());
+        for(int i = 0; i < container.size(); ++i) {
+            list.add(container.getStack(i).getItem());
         }
         return list.equals(NOMAD_BOOK_RECIPE_1) || list.equals(NOMAD_BOOK_RECIPE_2);
     }
 
     @Environment(EnvType.CLIENT)
     @Override
-    public boolean canCraftInDimensions(int width, int height) {
+    public boolean fits(int width, int height) {
         return width * height >= 2;
     }
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return RecipeSerializer.SHAPED_RECIPE;
+        return RecipeSerializer.SHAPED;
     }
 }

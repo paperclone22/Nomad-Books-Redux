@@ -1,22 +1,22 @@
 package net.zestyblaze.nomadbooks.mixin;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.zestyblaze.nomadbooks.item.NomadBookItem;
 import net.zestyblaze.nomadbooks.util.Constants;
 import org.jetbrains.annotations.NotNull;
@@ -26,16 +26,16 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ServerPlayer.class)
-public abstract class ServerPlayerMixin extends Player {
+@Mixin(ServerPlayerEntity.class)
+public abstract class ServerPlayerMixin extends PlayerEntity {
 
     @Override
-    @Shadow public abstract void playNotifySound(@NotNull SoundEvent soundEvent, @NotNull SoundSource soundSource, float f, float g);
+    @Shadow public abstract void playSound(@NotNull SoundEvent soundEvent, @NotNull SoundCategory soundSource, float f, float g);
 
     @Override
-    @Shadow public abstract void displayClientMessage(@NotNull Component chatComponent, boolean actionBar);
+    @Shadow public abstract void sendMessage(@NotNull Text chatComponent, boolean actionBar);
 
-    protected ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
+    protected ServerPlayerMixin(World level, BlockPos blockPos, float f, GameProfile gameProfile) {
         super(level, blockPos, f, gameProfile);
     }
 
@@ -43,19 +43,19 @@ public abstract class ServerPlayerMixin extends Player {
      * Implements the camp widening mechanic in which a number of biomes are required to visit
      * @param info CallbackInfo: "the juice that MixIns crave!"
      */
-    @Inject(method = "doTick", at = @At(value = "FIELD", target = "Lnet/minecraft/advancements/CriteriaTriggers;LOCATION:Lnet/minecraft/advancements/critereon/PlayerTrigger;"))
+    @Inject(method = "playerTick", at = @At(value = "FIELD", target = "Lnet/minecraft/advancement/criterion/Criteria;LOCATION:Lnet/minecraft/advancement/criterion/TickCriterion;"))
     private void enterBiome(CallbackInfo info) {
-        this.getInventory().items.stream().filter(itemStack -> itemStack.getItem() instanceof NomadBookItem)
+        this.getInventory().main.stream().filter(itemStack -> itemStack.getItem() instanceof NomadBookItem)
             .forEachOrdered(this::inkHandler);
     }
 
     private void inkHandler(ItemStack itemStack) {
-        CompoundTag tags = itemStack.getOrCreateTagElement(Constants.MODID);
+        NbtCompound tags = itemStack.getOrCreateSubNbt(Constants.MODID);
         // if inventory has an inked nomad book
         if (tags.getBoolean(Constants.INKED)) {
-            ListTag visitedBiomes = tags.getList(Constants.VISITED_BIOMES, Tag.TAG_STRING);
-            String currentBiome = this.level().getBiome(this.blockPosition()).toString();
-            if (currentBiome != null && !visitedBiomes.contains(StringTag.valueOf(currentBiome))) {
+            NbtList visitedBiomes = tags.getList(Constants.VISITED_BIOMES, NbtElement.STRING_TYPE);
+            String currentBiome = this.getWorld().getBiome(this.getBlockPos()).toString();
+            if (currentBiome != null && !visitedBiomes.contains(NbtString.of(currentBiome))) {
                 int inkProgress = tags.getInt(Constants.INK_PROGRESS);
                 int inkGoal = tags.getInt(Constants.INK_GOAL);
                 if (!visitedBiomes.isEmpty()) {
@@ -73,13 +73,13 @@ public abstract class ServerPlayerMixin extends Player {
                     tags.remove(Constants.VISITED_BIOMES);
                     tags.putInt(Constants.WIDTH, tags.getInt(Constants.WIDTH) + 2);
                     // if camp is deployed, move the camp pos
-                    BlockPos pos = NbtUtils.readBlockPos(tags.getCompound(Constants.CAMP_POS)).offset(-1, 0, -1);
-                    tags.put(Constants.CAMP_POS, NbtUtils.writeBlockPos(pos));
+                    BlockPos pos = NbtHelper.toBlockPos(tags.getCompound(Constants.CAMP_POS)).add(-1, 0, -1);
+                    tags.put(Constants.CAMP_POS, NbtHelper.fromBlockPos(pos));
                     // show a chat message to the player
-                    this.playNotifySound(SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.1f, 0.75f);
-                    this.displayClientMessage(Component.translatable("info.nomadbooks.itinerant_ink_done", tags.getInt(Constants.WIDTH)).setStyle(Style.EMPTY.withColor(ChatFormatting.BLUE)), false);
+                    this.playSound(SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 0.1f, 0.75f);
+                    this.sendMessage(Text.translatable("info.nomadbooks.itinerant_ink_done", tags.getInt(Constants.WIDTH)).setStyle(Style.EMPTY.withColor(Formatting.BLUE)), false);
                 } else {
-                    visitedBiomes.add(StringTag.valueOf(currentBiome));
+                    visitedBiomes.add(NbtString.of(currentBiome));
                     tags.put(Constants.VISITED_BIOMES, visitedBiomes);
                 }
             }

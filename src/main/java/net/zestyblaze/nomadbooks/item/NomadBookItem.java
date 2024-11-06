@@ -1,43 +1,43 @@
 package net.zestyblaze.nomadbooks.item;
 
 import joptsimple.internal.Strings;
-import net.minecraft.ChatFormatting;
-import net.minecraft.ResourceLocationException;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.block.BedBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.client.item.TooltipContext;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.DyeableItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUsageContext;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DyeableLeatherItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BedBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
+import net.minecraft.nbt.NbtString;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.structure.StructurePlacementData;
+import net.minecraft.structure.StructureTemplate;
+import net.minecraft.structure.StructureTemplateManager;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.InvalidIdentifierException;
+import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.BlockBox;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.World;
 import net.zestyblaze.nomadbooks.NomadBooks;
 import net.zestyblaze.nomadbooks.util.Constants;
 import net.zestyblaze.nomadbooks.util.ModTags;
@@ -53,22 +53,22 @@ import java.util.Optional;
 
 import static net.zestyblaze.nomadbooks.util.Helper.convertAABBtoBoundingBox;
 
-public class NomadBookItem extends Item implements DyeableLeatherItem {
+public class NomadBookItem extends Item implements DyeableItem {
     public static final int CAMP_RETRIEVAL_RADIUS = 20;
 
     public static final String DEFAULT_STRUCTURE_PATH = Constants.MODID + ":campfire3x1x3";
     public static final String NETHER_DEFAULT_STRUCTURE_PATH = Constants.MODID + ":nethercampfire7x3x7";
     public static final String CREATIVE_DEFAULT_STRUCTURE_PATH = Constants.MODID + ":nethercampfire15x15x15";
 
-    public NomadBookItem(Properties properties) {
+    public NomadBookItem(Settings properties) {
         super(properties);
     }
 
     @Override
-    public ItemStack getDefaultInstance() {
-        super.getDefaultInstance();
+    public ItemStack getDefaultStack() {
+        super.getDefaultStack();
         ItemStack itemStack = new ItemStack(this);
-        CompoundTag tags = itemStack.getOrCreateTagElement(Constants.MODID);
+        NbtCompound tags = itemStack.getOrCreateSubNbt(Constants.MODID);
         tags.putInt(Constants.HEIGHT, 1);
         tags.putInt(Constants.WIDTH, 3);
         tags.putString(Constants.STRUCTURE, DEFAULT_STRUCTURE_PATH);
@@ -79,7 +79,7 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
      * Do things regarding a currently <b>NOT</b> deployed camp. click the item on a block
      */
     @Override
-    public InteractionResult useOn(UseOnContext context) {
+    public ActionResult useOnBlock(ItemUsageContext context) {
         // TODO Refactor to reduce cognitive complexity
 
         //                        | 01 | 02 | 03 | 04 | 05 | 06 | 07 | 08
@@ -94,10 +94,10 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
         // I am seeing many missed edge cases. will have to REFACTOR the whole F***ng thing to fully address
 
         // Stock Flags
-        CompoundTag tags = context.getItemInHand().getOrCreateTagElement(Constants.MODID);
-        boolean isDeployed = context.getItemInHand().getOrCreateTag().getFloat(Constants.DEPLOYED) == 1f; // is deployed
-        Level world = context.getLevel();
-        Player player = Objects.requireNonNull(context.getPlayer());
+        NbtCompound tags = context.getStack().getOrCreateSubNbt(Constants.MODID);
+        boolean isDeployed = context.getStack().getOrCreateNbt().getFloat(Constants.DEPLOYED) == 1f; // is deployed
+        World world = context.getWorld();
+        PlayerEntity player = Objects.requireNonNull(context.getPlayer());
         String structurePath = tags.getString(Constants.STRUCTURE);
         int height = tags.getInt(Constants.HEIGHT);
         int width = tags.getInt(Constants.WIDTH);
@@ -106,40 +106,40 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
         // Setup Logic / Checks
         if (isDeployed) {
             this.use(world, player, context.getHand()); // note calls use()
-            return InteractionResult.FAIL;
+            return ActionResult.FAIL;
         }
         // checks just the clicked position. continues down to a valid place
-        BlockPos pos = context.getClickedPos(); // Oh [neat](https://media1.tenor.com/m/UchYBXaC-1cAAAAC/futurama-bender.gif
+        BlockPos pos = context.getBlockPos(); // Oh [neat](https://media1.tenor.com/m/UchYBXaC-1cAAAAC/futurama-bender.gif
         pos = findTheGround(pos, tags, world);
         // set dimension tag
-        Level.RESOURCE_KEY_CODEC.encodeStart(NbtOps.INSTANCE, world.dimension()).result().ifPresent(tag -> tags.put(Constants.DIMENSION, tag));
+        World.CODEC.encodeStart(NbtOps.INSTANCE, world.getRegistryKey()).result().ifPresent(tag -> tags.put(Constants.DIMENSION, tag));
         // center position on camp center
-        pos = pos.offset(new BlockPos(-width / 2, 1, -width / 2));
+        pos = pos.add(new BlockPos(-width / 2, 1, -width / 2));
         //-----------------------------
 
         // Upgrades Flags
-        boolean hasAquaticMembrane = tags.getList(Constants.UPGRADES, Tag.TAG_STRING).contains(StringTag.valueOf(Constants.AQUATIC_MEMBRANE)); // 🟦
-        boolean hasFungiSupport = tags.getList(Constants.UPGRADES, Tag.TAG_STRING).contains(StringTag.valueOf(Constants.FUNGI_SUPPORT)); // 🟪
-        boolean hasSpacialDisplacer = tags.getList(Constants.UPGRADES, Tag.TAG_STRING).contains(StringTag.valueOf(Constants.SPACIAL_DISPLACER)); // 🟫
+        boolean hasAquaticMembrane = tags.getList(Constants.UPGRADES, NbtElement.STRING_TYPE).contains(NbtString.of(Constants.AQUATIC_MEMBRANE)); // 🟦
+        boolean hasFungiSupport = tags.getList(Constants.UPGRADES, NbtElement.STRING_TYPE).contains(NbtString.of(Constants.FUNGI_SUPPORT)); // 🟪
+        boolean hasSpacialDisplacer = tags.getList(Constants.UPGRADES, NbtElement.STRING_TYPE).contains(NbtString.of(Constants.SPACIAL_DISPLACER)); // 🟫
         boolean hasDefaultStructure = tags.getString(Constants.STRUCTURE).equals(DEFAULT_STRUCTURE_PATH) || tags.getString(Constants.STRUCTURE).equals(NETHER_DEFAULT_STRUCTURE_PATH) || tags.getString(Constants.STRUCTURE).equals(CREATIVE_DEFAULT_STRUCTURE_PATH);
         hasSpacialDisplacer = hasSpacialDisplacer && !hasDefaultStructure; // If book has Displacer Page, but still uses the Default structure. Then pretend It doesn't have the Displacer Page.
         // -----------------------------------
 
         // Upgrades, Checks and Func
         // check if there's enough space
-        BoundingBox campVolume = BoundingBox.fromCorners(pos, pos.offset(width - 1, height - 1, width - 1));
+        BlockBox campVolume = BlockBox.create(pos, pos.add(width - 1, height - 1, width - 1));
         int spaceY;
         int maxChecks = NomadBooksConfig.checksAboveOnDeploy;
         for (spaceY=0; spaceY <= maxChecks; spaceY++) {
-            if (hasEnoughSpace(world, campVolume.moved(0,spaceY,0), hasAquaticMembrane, hasSpacialDisplacer)) { // 🟦🟫 check
-                pos = pos.above(spaceY);
-                campVolume = campVolume.moved(0,spaceY,0);
+            if (hasEnoughSpace(world, campVolume.offset(0,spaceY,0), hasAquaticMembrane, hasSpacialDisplacer)) { // 🟦🟫 check
+                pos = pos.up(spaceY);
+                campVolume = campVolume.offset(0,spaceY,0);
                 break;
             }
         }
         if (spaceY > maxChecks && !hasSpacialDisplacer) { // here if SPACIAL_DISPLACER, ignore this fail // 🟫 check
-            player.displayClientMessage(Component.translatable("error.nomadbooks.no_space"), true);
-            return InteractionResult.FAIL;
+            player.sendMessage(Text.translatable("error.nomadbooks.no_space"), true);
+            return ActionResult.FAIL;
         }
         // mushroom platform upgrade FUNGI_SUPPORT
         if (hasFungiSupport) { // 🟪 check
@@ -149,88 +149,88 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
             boolean foundValid = false;
             if (!hasFungiSupport && hasSpacialDisplacer) {
                 for (int i = 0; i < width/2; i++) {
-                    if (isSurfaceValid(world, pos.below(i+1), width)) {
-                        pos = pos.below(i+1);
-                        campVolume = campVolume.moved(0, -i-1, 0);
+                    if (isSurfaceValid(world, pos.down(i+1), width)) {
+                        pos = pos.down(i+1);
+                        campVolume = campVolume.offset(0, -i-1, 0);
                         foundValid = true;
                         break;
                     }
                 }
             }
             if ( !hasEnoughSpace(world, campVolume, hasAquaticMembrane, hasSpacialDisplacer) ) {
-                player.displayClientMessage(Component.translatable("error.nomadbooks.no_space"), true);
-                return InteractionResult.FAIL;
+                player.sendMessage(Text.translatable("error.nomadbooks.no_space"), true);
+                return ActionResult.FAIL;
             }
             if (!foundValid) {
-                player.displayClientMessage(Component.translatable("error.nomadbooks.invalid_surface"), true);
-                return InteractionResult.FAIL;
+                player.sendMessage(Text.translatable("error.nomadbooks.invalid_surface"), true);
+                return ActionResult.FAIL;
             }
         }
         // Move Player up with mushroom upgrade (no need to check the upgrade because it's not possible to place without it and satisfy the TP)
-        BoundingBox fungiCapMovementCheck = new BoundingBox(pos.getX(), pos.getY() -1, pos.getZ(), pos.getX() +width -1, pos.getY() -1, pos.getZ() +width -1);
+        BlockBox fungiCapMovementCheck = new BlockBox(pos.getX(), pos.getY() -1, pos.getZ(), pos.getX() +width -1, pos.getY() -1, pos.getZ() +width -1);
         Vec3i minPos = new Vec3i((width-1)/2 +pos.getX() -1, pos.getY() -5, (width-1)/2 +pos.getZ() -1);
         Vec3i maxPos = new Vec3i((width-1)/2 +pos.getX() +1, pos.getY() -2, (width-1)/2 +pos.getZ() +1);
-        BoundingBox fungiStem = BoundingBox.fromCorners(minPos, maxPos);
+        BlockBox fungiStem = BlockBox.create(minPos, maxPos);
         if (fungiCapMovementCheck.intersects(convertAABBtoBoundingBox(player.getBoundingBox()))
         || fungiStem.intersects(convertAABBtoBoundingBox(player.getBoundingBox()))) {
-            player.teleportTo(player.getX(), pos.getY(), player.getZ());
+            player.requestTeleport(player.getX(), pos.getY(), player.getZ());
         }
         // if membrane upgrade, replace water and underwater plants with membrane
         if (hasAquaticMembrane) { // 🟦 check + do
-            BoundingBox membraneVolume = new BoundingBox(pos.getX()-1, pos.getY()-1, pos.getZ()-1, pos.getX()+width, pos.getY()+height, pos.getZ()+width);
-            BoundingBox membraneMinX = new BoundingBox(membraneVolume.minX(), membraneVolume.minY()+1, membraneVolume.minZ()+1, membraneVolume.minX() /*🟩*/, membraneVolume.maxY()-1, membraneVolume.maxZ()-1);
-            BoundingBox membraneMaxX = new BoundingBox(membraneVolume.maxX() /*🟩*/, membraneVolume.minY()+1, membraneVolume.minZ()+1, membraneVolume.maxX(), membraneVolume.maxY()-1, membraneVolume.maxZ()-1);
-            BoundingBox membraneMinZ = new BoundingBox(membraneVolume.minX()+1, membraneVolume.minY()+1, membraneVolume.minZ(), membraneVolume.maxX()-1, membraneVolume.maxY()-1, membraneVolume.minZ() /*🟩*/);
-            BoundingBox membraneMaxZ = new BoundingBox(membraneVolume.minX()+1, membraneVolume.minY()+1, membraneVolume.maxZ() /*🟩*/, membraneVolume.maxX()-1, membraneVolume.maxY()-1, membraneVolume.maxZ());
-            BoundingBox membraneMaxY = new BoundingBox(membraneVolume.minX()+1, membraneVolume.maxY() /*🟩*/, membraneVolume.minZ()+1, membraneVolume.maxX()-1, membraneVolume.maxY(), membraneVolume.maxZ()-1);
-            List<BoundingBox> membranePanels = Arrays.asList(membraneMinX, membraneMaxX, membraneMinZ, membraneMaxZ, membraneMaxY);
-            Streams.stream(membranePanels).forEach(panel -> BlockPos.betweenClosedStream(panel)
+            BlockBox membraneVolume = new BlockBox(pos.getX()-1, pos.getY()-1, pos.getZ()-1, pos.getX()+width, pos.getY()+height, pos.getZ()+width);
+            BlockBox membraneMinX = new BlockBox(membraneVolume.getMinX(), membraneVolume.getMinY()+1, membraneVolume.getMinZ()+1, membraneVolume.getMinX() /*🟩*/, membraneVolume.getMaxY()-1, membraneVolume.getMaxZ()-1);
+            BlockBox membraneMaxX = new BlockBox(membraneVolume.getMaxX() /*🟩*/, membraneVolume.getMinY()+1, membraneVolume.getMinZ()+1, membraneVolume.getMaxX(), membraneVolume.getMaxY()-1, membraneVolume.getMaxZ()-1);
+            BlockBox membraneMinZ = new BlockBox(membraneVolume.getMinX()+1, membraneVolume.getMinY()+1, membraneVolume.getMinZ(), membraneVolume.getMaxX()-1, membraneVolume.getMaxY()-1, membraneVolume.getMinZ() /*🟩*/);
+            BlockBox membraneMaxZ = new BlockBox(membraneVolume.getMinX()+1, membraneVolume.getMinY()+1, membraneVolume.getMaxZ() /*🟩*/, membraneVolume.getMaxX()-1, membraneVolume.getMaxY()-1, membraneVolume.getMaxZ());
+            BlockBox membraneMaxY = new BlockBox(membraneVolume.getMinX()+1, membraneVolume.getMaxY() /*🟩*/, membraneVolume.getMinZ()+1, membraneVolume.getMaxX()-1, membraneVolume.getMaxY(), membraneVolume.getMaxZ()-1);
+            List<BlockBox> membranePanels = Arrays.asList(membraneMinX, membraneMaxX, membraneMinZ, membraneMaxZ, membraneMaxY);
+            Streams.stream(membranePanels).forEach(panel -> BlockPos.stream(panel)
                 .filter(bp -> isBlockUnderwaterReplaceable(world.getBlockState(bp)))
                 .forEach(bp -> {
-                    world.destroyBlock(bp, true);
-                    world.setBlock(bp, NomadBooks.MEMBRANE.defaultBlockState(), 2);
+                    world.breakBlock(bp, true);
+                    world.setBlockState(bp, NomadBooks.MEMBRANE.getDefaultState(), 2);
                 }));
         }
         // Save the Terrain as a structure using SPACIAL_DISPLACER
-        if (hasSpacialDisplacer && !world.isClientSide()) { // 🟫 check + do --V
-            ServerLevel serverLevel = (ServerLevel) world;
-            StructureTemplateManager structureTemplateManager = serverLevel.getStructureManager();
+        if (hasSpacialDisplacer && !world.isClient()) { // 🟫 check + do --V
+            ServerWorld serverLevel = (ServerWorld) world;
+            StructureTemplateManager structureTemplateManager = serverLevel.getStructureTemplateManager();
             // Save the structure
             StructureTemplate structure;
             try {
-                structure = structureTemplateManager.getOrCreate(new ResourceLocation(structurePath + Constants.DISPLACED));
-            } catch (ResourceLocationException e) {
+                structure = structureTemplateManager.getTemplateOrBlank(new Identifier(structurePath + Constants.DISPLACED));
+            } catch (InvalidIdentifierException e) {
                 NomadBooks.LOGGER.error("Error creating or retrieving structure: {}", e.getMessage());
-                return InteractionResult.FAIL;
+                return ActionResult.FAIL;
             }
-            structure.fillFromWorld(world, pos.offset(new BlockPos(0, 0, 0)), new BlockPos(width, height, width), true, Blocks.STRUCTURE_VOID);
-            structure.setAuthor(player.getScoreboardName());
-            structureTemplateManager.save(new ResourceLocation(structurePath + Constants.DISPLACED)); // added DISPLACED
+            structure.saveFromWorld(world, pos.add(new BlockPos(0, 0, 0)), new BlockPos(width, height, width), true, Blocks.STRUCTURE_VOID);
+            structure.setAuthor(player.getEntityName());
+            structureTemplateManager.saveTemplate(new Identifier(structurePath + Constants.DISPLACED)); // added DISPLACED
         }
         // destroy destroyable blocks in the way
-        BlockPos.betweenClosedStream(campVolume).forEach(bp -> world.setBlock(bp, Blocks.AIR.defaultBlockState(), 2));
+        BlockPos.stream(campVolume).forEach(bp -> world.setBlockState(bp, Blocks.AIR.getDefaultState(), 2));
         // Place the structure
-        if (!world.isClientSide()) {
+        if (!world.isClient()) {
             placeStructure(world, structurePath, pos, width);
         }
         // set deployed, register nbt
-        context.getItemInHand().getOrCreateTag().putFloat(Constants.DEPLOYED, 1F); // set is deployed
-        tags.put(Constants.CAMP_POS, NbtUtils.writeBlockPos(pos));
+        context.getStack().getOrCreateNbt().putFloat(Constants.DEPLOYED, 1F); // set is deployed
+        tags.put(Constants.CAMP_POS, NbtHelper.fromBlockPos(pos));
 
-        world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 1, 1);
-        return InteractionResult.SUCCESS;
+        world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_BOOK_PAGE_TURN, SoundCategory.BLOCKS, 1, 1);
+        return ActionResult.SUCCESS;
     }
 
     /**
      * checks just the clicked position. If the position is replaceable, then continue checking down until something isn't replaceable
      * AKA: Find the ground
      */
-    private BlockPos findTheGround(BlockPos pos, CompoundTag tags, Level level) {
+    private BlockPos findTheGround(BlockPos pos, NbtCompound tags, World level) {
 //        BlockPos pos = context.getClickedPos(); // Oh [neat](https://media1.tenor.com/m/UchYBXaC-1cAAAAC/futurama-bender.gif
         while (isBlockReplaceable(level.getBlockState(pos))
             || isBlockUnderwaterReplaceable(level.getBlockState(pos))
-            && tags.getList(Constants.UPGRADES, Tag.TAG_STRING).contains(StringTag.valueOf(Constants.AQUATIC_MEMBRANE))) { // 🟦 unrelated check to AQUATIC_MEMBRANE
-            pos = pos.below();
+            && tags.getList(Constants.UPGRADES, NbtElement.STRING_TYPE).contains(NbtString.of(Constants.AQUATIC_MEMBRANE))) { // 🟦 unrelated check to AQUATIC_MEMBRANE
+            pos = pos.down();
         }
         return pos;
     }
@@ -238,13 +238,13 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
     /**
      * Basically: false if surface has any replaceable. true if a complete "Solid" surface
      */
-    private boolean isSurfaceValid(Level world, BlockPos pos, int width) {
-        BoundingBox surface = new BoundingBox(pos.getX(), pos.getY()-1, pos.getZ(), pos.getX()+width-1, pos.getY()-1, pos.getZ()+width-1);
-        return BlockPos.betweenClosedStream(surface).noneMatch(bp -> isBlockReplaceable(world.getBlockState(bp)));
+    private boolean isSurfaceValid(World world, BlockPos pos, int width) {
+        BlockBox surface = new BlockBox(pos.getX(), pos.getY()-1, pos.getZ(), pos.getX()+width-1, pos.getY()-1, pos.getZ()+width-1);
+        return BlockPos.stream(surface).noneMatch(bp -> isBlockReplaceable(world.getBlockState(bp)));
     }
 
-    private boolean hasEnoughSpace(Level world, BoundingBox campVolume, boolean hasAquatic, boolean hasDisplacer) {
-        return BlockPos.betweenClosedStream(campVolume).allMatch(bp -> {
+    private boolean hasEnoughSpace(World world, BlockBox campVolume, boolean hasAquatic, boolean hasDisplacer) {
+        return BlockPos.stream(campVolume).allMatch(bp -> {
             BlockState bs = world.getBlockState(bp);
             return isBlockReplaceable(bs)
                 || isBlockUnderwaterReplaceable(bs) && hasAquatic
@@ -252,34 +252,34 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
         });
     }
 
-    private void buildMushroomPlatform(Level level, BlockPos pos, int width) {
-        BoundingBox fungiCap = new BoundingBox(pos.getX(), pos.getY() -1, pos.getZ(), pos.getX() +width -1, pos.getY() -1, pos.getZ() +width -1);
-        BlockPos.betweenClosedStream(fungiCap).forEach(bp -> {
+    private void buildMushroomPlatform(World level, BlockPos pos, int width) {
+        BlockBox fungiCap = new BlockBox(pos.getX(), pos.getY() -1, pos.getZ(), pos.getX() +width -1, pos.getY() -1, pos.getZ() +width -1);
+        BlockPos.stream(fungiCap).forEach(bp -> {
             BlockState bs = level.getBlockState(bp);
             if (isBlockReplaceable(bs) || isBlockUnderwaterReplaceable(bs)) {
-                level.destroyBlock(bp, true);
-                level.setBlock(bp, NomadBooks.NOMAD_MUSHROOM_BLOCK.defaultBlockState(), 2);
+                level.breakBlock(bp, true);
+                level.setBlockState(bp, NomadBooks.NOMAD_MUSHROOM_BLOCK.getDefaultState(), 2);
             }
         });
         Vec3i minPos = new Vec3i((width-1)/2 +pos.getX() -1, pos.getY() -5, (width-1)/2 +pos.getZ() -1);
         Vec3i maxPos = new Vec3i((width-1)/2 +pos.getX() +1, pos.getY() -2, (width-1)/2 +pos.getZ() +1);
-        BoundingBox fungiStem = BoundingBox.fromCorners(minPos, maxPos);
-        BlockPos.betweenClosedStream(fungiStem).forEach(bp -> {
+        BlockBox fungiStem = BlockBox.create(minPos, maxPos);
+        BlockPos.stream(fungiStem).forEach(bp -> {
             if (isBlockReplaceable(level.getBlockState(bp)) || isBlockUnderwaterReplaceable(level.getBlockState(bp))) {
-                level.destroyBlock(bp, true);
-                level.setBlock(bp, NomadBooks.NOMAD_MUSHROOM_STEM.defaultBlockState(), 2);
+                level.breakBlock(bp, true);
+                level.setBlockState(bp, NomadBooks.NOMAD_MUSHROOM_STEM.getDefaultState(), 2);
             }
         });
     }
 
-    private void placeStructure(Level level, String structurePath, BlockPos pos, int width) {
-        ServerLevel serverLevel = (ServerLevel) level;
-        Optional<StructureTemplate> structure = serverLevel.getStructureManager().get(new ResourceLocation(structurePath));
+    private void placeStructure(World level, String structurePath, BlockPos pos, int width) {
+        ServerWorld serverLevel = (ServerWorld) level;
+        Optional<StructureTemplate> structure = serverLevel.getStructureTemplateManager().getTemplate(new Identifier(structurePath));
 
         if (structure.isPresent()) {
             int offsetWidth = (width - structure.get().getSize().getX()) / 2;
-            StructurePlaceSettings placementData = new StructurePlaceSettings().setIgnoreEntities(true);
-            structure.get().placeInWorld(serverLevel, pos.offset(offsetWidth, 0, offsetWidth), pos.offset(offsetWidth, 0, offsetWidth), placementData, serverLevel.getRandom(), 2); // Bingo
+            StructurePlacementData placementData = new StructurePlacementData().setIgnoreEntities(true);
+            structure.get().place(serverLevel, pos.add(offsetWidth, 0, offsetWidth), pos.add(offsetWidth, 0, offsetWidth), placementData, serverLevel.getRandom(), 2); // Bingo
         }
     }
 
@@ -290,86 +290,86 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
      * Such as: toggle display boundaries when shift-right-click, teleport to it using offhand ender-pearls, first-time use save as a new structure file, retrieve the camp if within normal distance
      */
     @Override
-    public InteractionResultHolder<ItemStack> use(@NotNull Level world, Player user, @NotNull InteractionHand hand) {
-        ItemStack itemStack = user.getItemInHand(hand);
-        CompoundTag tags = itemStack.getOrCreateTagElement(Constants.MODID);
-        boolean isDeployed = itemStack.getOrCreateTag().getFloat(Constants.DEPLOYED) == 1f;
+    public TypedActionResult<ItemStack> use(@NotNull World world, PlayerEntity user, @NotNull Hand hand) {
+        ItemStack itemStack = user.getStackInHand(hand);
+        NbtCompound tags = itemStack.getOrCreateSubNbt(Constants.MODID);
+        boolean isDeployed = itemStack.getOrCreateNbt().getFloat(Constants.DEPLOYED) == 1f;
 
         if (!isDeployed) { // if camp isn't deployed, this use() method is not to be used. so use() is meant to retrieve a camp + other things
-            return InteractionResultHolder.fail(itemStack);
+            return TypedActionResult.fail(itemStack);
         }
 
-        BlockPos pos = NbtUtils.readBlockPos(tags.getCompound(Constants.CAMP_POS));
+        BlockPos pos = NbtHelper.toBlockPos(tags.getCompound(Constants.CAMP_POS));
         int height = tags.getInt(Constants.HEIGHT);
         int width = tags.getInt(Constants.WIDTH);
         String structurePath = tags.getString(Constants.STRUCTURE);
 
-        if (user.isShiftKeyDown()) {
+        if (user.isSneaking()) {
             toggleBoundaries(user, tags);
-            return InteractionResultHolder.pass(itemStack);
+            return TypedActionResult.pass(itemStack);
         }
         if (teleportToCampHandler(tags, world, user, pos, width)) { // teleport to camp. not shifting. and either tp will ender-pearls or too far message. else try retrieve below.
-            return InteractionResultHolder.success(itemStack);
+            return TypedActionResult.success(itemStack);
         }
         if (createStructureIfDefaultOrRetrieve(tags, structurePath, user, world, pos, width, height)) { // Create a new structure or retrieve the camp. only false on error
             // set undeployed
-            itemStack.getOrCreateTag().putFloat(Constants.DEPLOYED, 0F);
+            itemStack.getOrCreateNbt().putFloat(Constants.DEPLOYED, 0F);
                 removeBlocks(tags, world, pos, width, height);
             placeTerrainWithSpacialDisplacer(tags, world, pos, width);
             // Remove Boundaries and play sound
             tags.putBoolean(Constants.DISPLAY_BOUNDARIES, false);
-            world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 1, 0.9f);
-            return InteractionResultHolder.success(itemStack);
+            world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ITEM_BOOK_PAGE_TURN, SoundCategory.BLOCKS, 1, 0.9f);
+            return TypedActionResult.success(itemStack);
         }
         // Probably wont ever be hit
-        return InteractionResultHolder.fail(itemStack);
+        return TypedActionResult.fail(itemStack);
     }
 
-    private void placeTerrainWithSpacialDisplacer(CompoundTag tags, Level world, BlockPos pos, int width) {
+    private void placeTerrainWithSpacialDisplacer(NbtCompound tags, World world, BlockPos pos, int width) {
 
         String structurePath = tags.getString(Constants.STRUCTURE) + Constants.DISPLACED;
 
-        if (tags.getList(Constants.UPGRADES, Tag.TAG_STRING).contains(StringTag.valueOf(Constants.SPACIAL_DISPLACER))
-        && !world.isClientSide()) {
+        if (tags.getList(Constants.UPGRADES, NbtElement.STRING_TYPE).contains(NbtString.of(Constants.SPACIAL_DISPLACER))
+        && !world.isClient()) {
             // Place the structure
             placeStructure(world, structurePath, pos, width); // TODO should I add checks for if the player upgraded the camp size?
         }
     }
 
-    private void toggleBoundaries(Player user, CompoundTag tags) {
+    private void toggleBoundaries(PlayerEntity user, NbtCompound tags) {
         boolean displayBoundaries = tags.getBoolean(Constants.DISPLAY_BOUNDARIES);
         displayBoundaries = !displayBoundaries;
-        user.displayClientMessage(Component.translatable(displayBoundaries ? "info.nomadbooks.display_boundaries_on" : "info.nomadbooks.display_boundaries_off"), true);
+        user.sendMessage(Text.translatable(displayBoundaries ? "info.nomadbooks.display_boundaries_on" : "info.nomadbooks.display_boundaries_off"), true);
         tags.putBoolean(Constants.DISPLAY_BOUNDARIES, displayBoundaries);
     }
 
     /**
      * handler should return true if an action is performed within
      */
-    private boolean teleportToCampHandler(CompoundTag tags, Level world, Player user, BlockPos pos, int width) {
+    private boolean teleportToCampHandler(NbtCompound tags, World world, PlayerEntity user, BlockPos pos, int width) {
         // handler should return true if an action is performed within
-        Optional<ResourceKey<Level>> dimension = Level.RESOURCE_KEY_CODEC.parse(NbtOps.INSTANCE, tags.get(Constants.DIMENSION)).result();
+        Optional<RegistryKey<World>> dimension = World.CODEC.parse(NbtOps.INSTANCE, tags.get(Constants.DIMENSION)).result();
         double centerX = pos.getX() + (width / 2.0) + 0.5;
         double centerZ = pos.getZ() + (width / 2.0) + 0.5;
-        double distanceSquared = user.distanceToSqr(centerX, pos.getY(), centerZ);
+        double distanceSquared = user.squaredDistanceTo(centerX, pos.getY(), centerZ);
 
-        if (dimension.isEmpty() || dimension.get() != world.dimension()) {
-            user.displayClientMessage(Component.translatable("error.nomadbooks.different_dimension"), true);
+        if (dimension.isEmpty() || dimension.get() != world.getRegistryKey()) {
+            user.sendMessage(Text.translatable("error.nomadbooks.different_dimension"), true);
             return true; // Dimension mismatch
         }
         if (distanceSquared > CAMP_RETRIEVAL_RADIUS * CAMP_RETRIEVAL_RADIUS) {
             int enderPrice = (int) Math.ceil(Math.sqrt(distanceSquared) / 100);
 
             // Insufficient ender pearls
-            if (user.getOffhandItem().getItem() == Items.ENDER_PEARL && user.getOffhandItem().getCount() >= enderPrice) {
-                world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1f, 1f);
-                user.teleportTo(centerX, pos.getY(), centerZ);
+            if (user.getOffHandStack().getItem() == Items.ENDER_PEARL && user.getOffHandStack().getCount() >= enderPrice) {
+                world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_ENDERMAN_TELEPORT, SoundCategory.PLAYERS, 1f, 1f);
+                user.requestTeleport(centerX, pos.getY(), centerZ);
                 if (!user.isCreative()) {
-                    user.getOffhandItem().shrink(enderPrice);
+                    user.getOffHandStack().decrement(enderPrice);
                 }
-                world.playSound(null, centerX, pos.getY(), centerZ, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1f, 1f);
+                world.playSound(null, centerX, pos.getY(), centerZ, SoundEvents.ENTITY_ENDERMAN_TELEPORT, SoundCategory.PLAYERS, 1f, 1f);
             } else {
-                user.displayClientMessage(Component.translatable("error.nomadbooks.camp_too_far"), true);
+                user.sendMessage(Text.translatable("error.nomadbooks.camp_too_far"), true);
             }
             return true; // Teleported
         }
@@ -379,37 +379,37 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
     /**
      * Create a new structure or retrieve the camp. only false on error
      */
-    private boolean createStructureIfDefaultOrRetrieve(CompoundTag tags, String structurePath, Player user, Level world, BlockPos pos, int width, int height) {
+    private boolean createStructureIfDefaultOrRetrieve(NbtCompound tags, String structurePath, PlayerEntity user, World world, BlockPos pos, int width, int height) {
         // Check if the structure path needs to be generated
         if (structurePath.equals(DEFAULT_STRUCTURE_PATH) || structurePath.equals(NETHER_DEFAULT_STRUCTURE_PATH) || structurePath.equals(CREATIVE_DEFAULT_STRUCTURE_PATH)) {
-            List<String> path = Arrays.asList(user.getUUID().toString(), String.valueOf(System.currentTimeMillis()));
-            structurePath = new ResourceLocation(Constants.MODID, Strings.join(path, "/")).toString();
+            List<String> path = Arrays.asList(user.getUuid().toString(), String.valueOf(System.currentTimeMillis()));
+            structurePath = new Identifier(Constants.MODID, Strings.join(path, "/")).toString();
             NomadBooks.LOGGER.info("Creating Structure (Server thread): " + structurePath);
             tags.putString(Constants.STRUCTURE, structurePath);
         }
         // Server-side logic
-        if (!world.isClientSide) {
-            ServerLevel serverLevel = (ServerLevel) world;
-            StructureTemplateManager structureTemplateManager = serverLevel.getStructureManager();
+        if (!world.isClient) {
+            ServerWorld serverLevel = (ServerWorld) world;
+            StructureTemplateManager structureTemplateManager = serverLevel.getStructureTemplateManager();
             // Free beds from being occupied
-            BoundingBox campVolume = BoundingBox.fromCorners(pos, new Vec3i(pos.getX()+width-1, pos.getY()+height-1, pos.getZ()+width-1));
-            BlockPos.betweenClosedStream(campVolume).forEach(bp -> {
+            BlockBox campVolume = BlockBox.create(pos, new Vec3i(pos.getX()+width-1, pos.getY()+height-1, pos.getZ()+width-1));
+            BlockPos.stream(campVolume).forEach(bp -> {
                 BlockState blockState = world.getBlockState(bp);
                 if (blockState.getBlock() instanceof BedBlock) {
-                    world.setBlock(bp, blockState.setValue(BedBlock.OCCUPIED, false), 2);
+                    world.setBlockState(bp, blockState.with(BedBlock.OCCUPIED, false), 2);
                 }
             });
             // Save the structure
             StructureTemplate structure;
             try {
-                structure = structureTemplateManager.getOrCreate(new ResourceLocation(structurePath));
-            } catch (ResourceLocationException e) {
+                structure = structureTemplateManager.getTemplateOrBlank(new Identifier(structurePath));
+            } catch (InvalidIdentifierException e) {
                 NomadBooks.LOGGER.error("Error creating or retrieving structure: {}", e.getMessage());
                 return false; // 🟧  Return false on error
             }
-            structure.fillFromWorld(world, pos.offset(new BlockPos(0, 0, 0)), new BlockPos(width, height, width), true, Blocks.STRUCTURE_VOID);
-            structure.setAuthor(user.getScoreboardName());
-            structureTemplateManager.save(new ResourceLocation(structurePath));
+            structure.saveFromWorld(world, pos.add(new BlockPos(0, 0, 0)), new BlockPos(width, height, width), true, Blocks.STRUCTURE_VOID);
+            structure.setAuthor(user.getEntityName());
+            structureTemplateManager.saveTemplate(new Identifier(structurePath));
         }
         return true; // Return true indicating success
     }
@@ -418,36 +418,36 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
      * Remove the blocks left behind after the structure/camp is saved.
      * includes the camp, and blocks from upgrades.
      */
-    private void removeBlocks(CompoundTag tags, Level world, BlockPos pos, int width, int height) {
+    private void removeBlocks(NbtCompound tags, World world, BlockPos pos, int width, int height) {
         // clear block entities && remove blocks using BoundingBox
-        BoundingBox campVolume = BoundingBox.fromCorners(pos, new Vec3i(pos.getX()+width-1, pos.getY()+height-1, pos.getZ()+width-1));
-        BlockPos.betweenClosedStream(campVolume).forEach(bp -> { // NOTE: this is what the fill command does
+        BlockBox campVolume = BlockBox.create(pos, new Vec3i(pos.getX()+width-1, pos.getY()+height-1, pos.getZ()+width-1));
+        BlockPos.stream(campVolume).forEach(bp -> { // NOTE: this is what the fill command does
             // clear block entities && remove blocks
             world.removeBlockEntity(bp);
-            world.setBlock(bp, Blocks.AIR.defaultBlockState(), 255);
-            world.blockUpdated(bp, Blocks.AIR);
+            world.setBlockState(bp, Blocks.AIR.getDefaultState(), 255);
+            world.updateNeighbors(bp, Blocks.AIR);
         });
         // if membrane upgrade, remove membrane
-        if (tags.getList(Constants.UPGRADES, Tag.TAG_STRING).contains(StringTag.valueOf(Constants.AQUATIC_MEMBRANE))) {
-            BoundingBox membraneVolume = new BoundingBox(pos.getX()-1, pos.getY()-1, pos.getZ()-1, pos.getX()+width, pos.getY()+height, pos.getZ()+width);
-            BlockPos.betweenClosedStream(membraneVolume).forEach(bp -> {
+        if (tags.getList(Constants.UPGRADES, NbtElement.STRING_TYPE).contains(NbtString.of(Constants.AQUATIC_MEMBRANE))) {
+            BlockBox membraneVolume = new BlockBox(pos.getX()-1, pos.getY()-1, pos.getZ()-1, pos.getX()+width, pos.getY()+height, pos.getZ()+width);
+            BlockPos.stream(membraneVolume).forEach(bp -> {
                 if (world.getBlockState(bp).getBlock().equals(NomadBooks.MEMBRANE)) {
                     removeBlock(world, bp);
                 }
             });
         }
         // if mushroom upgrade, remove mushroom blocks
-        if (tags.getList(Constants.UPGRADES, Tag.TAG_STRING).contains(StringTag.valueOf(Constants.FUNGI_SUPPORT))) {
-            BoundingBox fungiCap = new BoundingBox(pos.getX(), pos.getY() -1, pos.getZ(), pos.getX() +width -1, pos.getY() -1, pos.getZ() +width -1);
-            BlockPos.betweenClosedStream(fungiCap).forEach(bp -> {
+        if (tags.getList(Constants.UPGRADES, NbtElement.STRING_TYPE).contains(NbtString.of(Constants.FUNGI_SUPPORT))) {
+            BlockBox fungiCap = new BlockBox(pos.getX(), pos.getY() -1, pos.getZ(), pos.getX() +width -1, pos.getY() -1, pos.getZ() +width -1);
+            BlockPos.stream(fungiCap).forEach(bp -> {
                 if (world.getBlockState(bp).getBlock().equals(NomadBooks.NOMAD_MUSHROOM_BLOCK)) {
                     removeBlock(world, bp);
                 }
             });
             Vec3i minPos = new Vec3i((width-1)/2 +pos.getX() -1, pos.getY() -5, (width-1)/2 +pos.getZ() -1);
             Vec3i maxPos = new Vec3i((width-1)/2 +pos.getX() +1, pos.getY() -2, (width-1)/2 +pos.getZ() +1);
-            BoundingBox fungiStem = BoundingBox.fromCorners(minPos, maxPos);
-            BlockPos.betweenClosedStream(fungiStem).forEach(bp -> {
+            BlockBox fungiStem = BlockBox.create(minPos, maxPos);
+            BlockPos.stream(fungiStem).forEach(bp -> {
                 if (world.getBlockState(bp).getBlock().equals(NomadBooks.NOMAD_MUSHROOM_STEM)) {
                     removeBlock(world, bp);
                 }
@@ -465,12 +465,12 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
         List<String> notFound = new ArrayList<>();
 
         for (String resource : resources) {
-            ResourceLocation location = ResourceLocation.tryParse(resource);
+            Identifier location = Identifier.tryParse(resource);
             if (location == null) {
                 notFound.add(resource);
             } else {
                 NomadBooks.LOGGER.debug("resource: " + location);
-                blocks.add(BuiltInRegistries.BLOCK.get(location));
+                blocks.add(Registries.BLOCK.get(location));
             }
         }
         if (!notFound.isEmpty()) {
@@ -489,14 +489,14 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
      */
     public static boolean isBlockReplaceable(BlockState blockState) {
         List<Block> configBlocks = getBlocksFromStrings(NomadBooksConfig.airReplaceable); // tmp
-        return blockState.is(ModTags.Blocks.IS_AIR_REPLACEABLE) || configBlocks.contains(blockState.getBlock());
+        return blockState.isIn(ModTags.Blocks.IS_AIR_REPLACEABLE) || configBlocks.contains(blockState.getBlock());
     }
 
     /**
      * Is the block replaceable for use underwater
      */
     public static boolean isBlockUnderwaterReplaceable(BlockState blockState) {
-        return blockState.is(ModTags.Blocks.IS_WATER_REPLACEABLE);
+        return blockState.isIn(ModTags.Blocks.IS_WATER_REPLACEABLE);
     }
 
 
@@ -505,15 +505,15 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
      */
     public static boolean isBlockDisplaceable(BlockState blockState) {
         List<Block> configBlocks = getBlocksFromStrings(NomadBooksConfig.notSpacialDisplaceable); // tmp
-        return !blockState.is(ModTags.Blocks.IS_NOT_DISPLACABLE) && !configBlocks.contains(blockState.getBlock());
+        return !blockState.isIn(ModTags.Blocks.IS_NOT_DISPLACABLE) && !configBlocks.contains(blockState.getBlock());
     }
 
     /**
      * Removes a block at a given position
      * Actually sets it to Air
      */
-    public void removeBlock(Level world, BlockPos blockPos) {
-        world.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 2);
+    public void removeBlock(World world, BlockPos blockPos) {
+        world.setBlockState(blockPos, Blocks.AIR.getDefaultState(), 2);
     }
 
     // End of 3 Util methods
@@ -524,8 +524,8 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
      * Adds all the cool toolTip info
      */
     @Override
-    public void appendHoverText(ItemStack stack, Level world, List<Component> tooltip, @NotNull TooltipFlag context) {
-        CompoundTag tags = stack.getOrCreateTagElement(Constants.MODID);
+    public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, @NotNull TooltipContext context) {
+        NbtCompound tags = stack.getOrCreateSubNbt(Constants.MODID);
 
         // Display height and width
         displayHeightAndWidth(tags, tooltip);
@@ -534,8 +534,8 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
         displayUpgrades(tags, tooltip);
 
         // Display fireproof
-        if (stack.getItem().isFireResistant()) {
-            tooltip.add(Component.translatable("item.nomadbooks.nomad_book.tooltip.fireproof").setStyle(Style.EMPTY.withItalic(true).withColor(ChatFormatting.RED)));
+        if (stack.getItem().isFireproof()) {
+            tooltip.add(Text.translatable("item.nomadbooks.nomad_book.tooltip.fireproof").setStyle(Style.EMPTY.withItalic(true).withColor(Formatting.RED)));
         }
 
         // Display ink progress if inked
@@ -548,43 +548,43 @@ public class NomadBookItem extends Item implements DyeableLeatherItem {
         displayBoundaries(tags, stack, tooltip);
     }
 
-    private void displayHeightAndWidth(CompoundTag tags, List<Component> tooltip) {
+    private void displayHeightAndWidth(NbtCompound tags, List<Text> tooltip) {
         int height = tags.getInt(Constants.HEIGHT);
         int width = tags.getInt(Constants.WIDTH);
-        tooltip.add(Component.translatable("item.nomadbooks.nomad_book.tooltip.height", height).setStyle(Style.EMPTY.withColor(ChatFormatting.GRAY)));
-        tooltip.add(Component.translatable("item.nomadbooks.nomad_book.tooltip.width", width).setStyle(Style.EMPTY.withColor(ChatFormatting.GRAY)));
+        tooltip.add(Text.translatable("item.nomadbooks.nomad_book.tooltip.height", height).setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
+        tooltip.add(Text.translatable("item.nomadbooks.nomad_book.tooltip.width", width).setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
     }
 
-    private void displayUpgrades(CompoundTag tags, List<Component> tooltip) {
-        ListTag upgrades = tags.getList(Constants.UPGRADES, Tag.TAG_STRING);
-        upgrades.forEach(tag -> tooltip.add(Component.translatable("upgrade.nomadbooks." + tag.getAsString()).setStyle(Style.EMPTY.withColor(ChatFormatting.DARK_AQUA))));
+    private void displayUpgrades(NbtCompound tags, List<Text> tooltip) {
+        NbtList upgrades = tags.getList(Constants.UPGRADES, NbtElement.STRING_TYPE);
+        upgrades.forEach(tag -> tooltip.add(Text.translatable("upgrade.nomadbooks." + tag.asString()).setStyle(Style.EMPTY.withColor(Formatting.DARK_AQUA))));
     }
 
-    private void displayInkProgress(CompoundTag tags, List<Component> tooltip) {
+    private void displayInkProgress(NbtCompound tags, List<Text> tooltip) {
         if (tags.getBoolean(Constants.INKED)) {
             int inkProgress = tags.getInt(Constants.INK_PROGRESS);
             int inkGoal = tags.getInt(Constants.INK_GOAL);
-            tooltip.add(Component.translatable("item.nomadbooks.nomad_book.tooltip.itinerant_ink", inkProgress, inkGoal).setStyle(Style.EMPTY.withColor(ChatFormatting.BLUE)));
+            tooltip.add(Text.translatable("item.nomadbooks.nomad_book.tooltip.itinerant_ink", inkProgress, inkGoal).setStyle(Style.EMPTY.withColor(Formatting.BLUE)));
         }
     }
 
-    private void displayCampCoordinates(CompoundTag tags, Level world, List<Component> tooltip) {
+    private void displayCampCoordinates(NbtCompound tags, World world, List<Text> tooltip) {
         if (tags.getFloat(Constants.DEPLOYED) == 1.0f) { // is deployed
-            BlockPos pos = NbtUtils.readBlockPos(tags.getCompound(Constants.CAMP_POS));
-            Optional<ResourceKey<Level>> dimension = Level.RESOURCE_KEY_CODEC.parse(NbtOps.INSTANCE, tags.get(Constants.DIMENSION)).result();
+            BlockPos pos = NbtHelper.toBlockPos(tags.getCompound(Constants.CAMP_POS));
+            Optional<RegistryKey<World>> dimension = World.CODEC.parse(NbtOps.INSTANCE, tags.get(Constants.DIMENSION)).result();
 
-            ChatFormatting color = ChatFormatting.DARK_GRAY;
+            Formatting color = Formatting.DARK_GRAY;
             Style style = Style.EMPTY.withColor(color);
-            if (dimension.isPresent() && dimension.get() != world.dimension()) {
-                style = style.applyFormats(ChatFormatting.OBFUSCATED);
+            if (dimension.isPresent() && dimension.get() != world.getRegistryKey()) {
+                style = style.withFormatting(Formatting.OBFUSCATED);
             }
-            tooltip.add(Component.translatable("item.nomadbooks.nomad_book.tooltip.position", pos.getX() + ", " + pos.getY() + ", " + pos.getZ()).setStyle(style));
+            tooltip.add(Text.translatable("item.nomadbooks.nomad_book.tooltip.position", pos.getX() + ", " + pos.getY() + ", " + pos.getZ()).setStyle(style));
         }
     }
 
-    private void displayBoundaries(CompoundTag tags, ItemStack stack, List<Component> tooltip) {
+    private void displayBoundaries(NbtCompound tags, ItemStack stack, List<Text> tooltip) {
         if (stack.getItem() instanceof NomadBookItem && tags.getBoolean(Constants.DISPLAY_BOUNDARIES)) {
-            tooltip.add(Component.translatable("item.nomadbooks.nomad_book.tooltip.boundaries_display").setStyle(Style.EMPTY.withColor(ChatFormatting.GREEN).withItalic(true)));
+            tooltip.add(Text.translatable("item.nomadbooks.nomad_book.tooltip.boundaries_display").setStyle(Style.EMPTY.withColor(Formatting.GREEN).withItalic(true)));
         }
     }
 
