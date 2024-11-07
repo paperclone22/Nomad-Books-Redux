@@ -29,6 +29,9 @@
     ],
     "fabric-datagen": [
       "net.zestyblaze.nomadbooks.NomadBooksDataGenerator"
+    ],
+    "modmenu": [
+      "net.zestyblaze.nomadbooks.util.ModMenuIntegration"
     ]
   },
   "mixins": [
@@ -38,8 +41,9 @@
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
-    "minecraft": "~${minecraft_version}",
-    "java": ">=17"
+    "minecraft": $compatible_minecraft_versions,
+    "java": ">=17",
+    "yet_another_config_lib_v3": "*"
   },
   "suggests": {
     "another-mod": "*"

@@ -25,6 +25,7 @@ public class ModTags {
 
 		private Items() {}
 
+		@SuppressWarnings("Unused")
 		private static TagKey<Item> createTag(String name) {
 			return TagKey.of(Registries.ITEM.getKey(), new Identifier(Constants.MODID, name));
 		}

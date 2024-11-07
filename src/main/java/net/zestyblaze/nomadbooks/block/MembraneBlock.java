@@ -14,14 +14,17 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
-public class MembraneBlock extends StainedGlassBlock {
+public class MembraneBlock extends StainedGlassBlock { // NOSONAR
     public MembraneBlock(Settings properties) {
         super(DyeColor.PURPLE, properties);
     }
 
+    /**
+     * @deprecated
+     */
     @Override
     @Deprecated(since = "2024-03-18")
-    public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
+    public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) { // NOSONAR
         if (entity instanceof ProjectileEntity) {
             entity.setVelocity(entity.getVelocity().getX()/2, entity.getVelocity().getY()/2, entity.getVelocity().getZ()/2);
         }

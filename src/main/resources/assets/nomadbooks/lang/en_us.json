@@ -26,8 +26,11 @@
   "upgrade.nomadbooks.aquatic_membrane": "Aquatic Membrane",
   "upgrade.nomadbooks.fungi_support": "Fungi Support",
   "upgrade.nomadbooks.spacial_displacer": "Spacial Displacer",
-  "nomadbooks.midnightconfig.title": "Nomad Books Redux",
-  "nomadbooks.midnightconfig.checksAboveOnDeploy": "checks to deploy with Fungi Support at additional +Y positions",
-  "nomadbooks.midnightconfig.airReplaceable": "Additional blocks to add to the Air Replaceable list",
-  "nomadbooks.midnightconfig.notSpacialDisplaceable": "Blocks that should never be displaced as Terrain"
+  "nomadbooks.yacl.title": "Nomad Books Redux",
+  "nomadbooks.yacl.checks_above_on_deploy": "Number of Fungi Checks Above on Deployment",
+  "nomadbooks.yacl.checks_above_on_deploy.desc": "checks to deploy with Fungi Support at additional +Y positions",
+  "nomadbooks.yacl.air_replaceable": "Air Replaceable",
+  "nomadbooks.yacl.air_replaceable.desc": "Additional blocks to add to the Air Replaceable list (comma separated Item IDs)",
+  "nomadbooks.yacl.not_spacial_displaceable": "Not Spacial Displaceable",
+  "nomadbooks.yacl.not_spacial_displaceable.desc": "Blocks that should never be displaced as Terrain (comma separated Item IDs)"
 }

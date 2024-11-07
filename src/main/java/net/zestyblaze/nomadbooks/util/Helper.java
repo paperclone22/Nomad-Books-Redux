@@ -1,5 +1,6 @@
 package net.zestyblaze.nomadbooks.util;
 
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockBox;
@@ -10,9 +11,6 @@ import java.util.function.Predicate;
 public class Helper {
 
 	private Helper(){}
-
-	public static final String DISPLAY = "display";
-	public static final String COLOR = "color";
 
 	/**
 	 * Return an ItemStack based on a Predicate test condition.
@@ -34,11 +32,21 @@ public class Helper {
 	 * Return true if all extra crafting slots are empty
 	 */
 	public static boolean hasNoExtraItems(RecipeInputInventory container, int myDesiredItemsAmount) {
-        int emptySlots = container.getInputStacks().stream()
-            .filter(ItemStack::isEmpty)
-            .toList().size();
-        int allSlotsMinusFilledSlots = container.size() - 1 - myDesiredItemsAmount;
-        return emptySlots == allSlotsMinusFilledSlots;
+		int emptySlots = container.getInputStacks().stream()
+				.filter(ItemStack::isEmpty)
+				.toList().size();
+		int allSlotsMinusFilledSlots = container.size() - 1 - myDesiredItemsAmount;
+		return emptySlots == allSlotsMinusFilledSlots;
+	}
+
+//	Compat stuff
+	public static boolean isModLoaded(String id) {
+		return FabricLoader.getInstance().isModLoaded(id);
+	}
+
+//	YACL
+	public static boolean isYACLLoaded() {
+		return isModLoaded("yet_another_config_lib_v3");
 	}
 
 }
