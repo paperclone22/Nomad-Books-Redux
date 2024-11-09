@@ -129,7 +129,7 @@ public class NomadBookItem extends Item implements DyeableItem {
         // check if there's enough space
         BlockBox campVolume = BlockBox.create(pos, pos.add(width - 1, height - 1, width - 1));
         int spaceY;
-        int maxChecks = 2/*NomadBooksYACLConfig.checksAboveOnDeploy*/; // TODO re-add this
+        int maxChecks = NomadBooksYACLConfig.checksAboveOnDeploy;
         for (spaceY=0; spaceY <= maxChecks; spaceY++) {
             if (hasEnoughSpace(world, campVolume.offset(0,spaceY,0), hasAquaticMembrane, hasSpacialDisplacer)) { // 🟦🟫 check
                 pos = pos.up(spaceY);
@@ -184,7 +184,7 @@ public class NomadBookItem extends Item implements DyeableItem {
             BlockBox membraneMaxZ = new BlockBox(membraneVolume.getMinX()+1, membraneVolume.getMinY()+1, membraneVolume.getMaxZ() /*🟩*/, membraneVolume.getMaxX()-1, membraneVolume.getMaxY()-1, membraneVolume.getMaxZ());
             BlockBox membraneMaxY = new BlockBox(membraneVolume.getMinX()+1, membraneVolume.getMaxY() /*🟩*/, membraneVolume.getMinZ()+1, membraneVolume.getMaxX()-1, membraneVolume.getMaxY(), membraneVolume.getMaxZ()-1);
             List<BlockBox> membranePanels = Arrays.asList(membraneMinX, membraneMaxX, membraneMinZ, membraneMaxZ, membraneMaxY);
-            Streams.stream(membranePanels).forEach(panel -> BlockPos.stream(panel)
+            Streams.failableStream(membranePanels).forEach(panel -> BlockPos.stream(panel)
                 .filter(bp -> isBlockUnderwaterReplaceable(world.getBlockState(bp)))
                 .forEach(bp -> {
                     world.breakBlock(bp, true);
@@ -204,7 +204,7 @@ public class NomadBookItem extends Item implements DyeableItem {
                 return ActionResult.FAIL;
             }
             structure.saveFromWorld(world, pos.add(new BlockPos(0, 0, 0)), new BlockPos(width, height, width), true, Blocks.STRUCTURE_VOID);
-            structure.setAuthor(player.getEntityName());
+            structure.setAuthor(player.getNameForScoreboard());
             structureTemplateManager.saveTemplate(new Identifier(structurePath + Constants.DISPLACED)); // added DISPLACED
         }
         // destroy destroyable blocks in the way
@@ -384,7 +384,7 @@ public class NomadBookItem extends Item implements DyeableItem {
         if (structurePath.equals(DEFAULT_STRUCTURE_PATH) || structurePath.equals(NETHER_DEFAULT_STRUCTURE_PATH) || structurePath.equals(CREATIVE_DEFAULT_STRUCTURE_PATH)) {
             List<String> path = Arrays.asList(user.getUuid().toString(), String.valueOf(System.currentTimeMillis()));
             structurePath = new Identifier(Constants.MODID, Strings.join(path, "/")).toString();
-            NomadBooks.LOGGER.info("Creating Structure (Server thread): " + structurePath);
+            NomadBooks.LOGGER.info("Creating Structure (Server thread): {}", structurePath);
             tags.putString(Constants.STRUCTURE, structurePath);
         }
         // Server-side logic
@@ -408,7 +408,7 @@ public class NomadBookItem extends Item implements DyeableItem {
                 return false; // 🟧  Return false on error
             }
             structure.saveFromWorld(world, pos.add(new BlockPos(0, 0, 0)), new BlockPos(width, height, width), true, Blocks.STRUCTURE_VOID);
-            structure.setAuthor(user.getEntityName());
+            structure.setAuthor(user.getNameForScoreboard());
             structureTemplateManager.saveTemplate(new Identifier(structurePath));
         }
         return true; // Return true indicating success
@@ -469,15 +469,13 @@ public class NomadBookItem extends Item implements DyeableItem {
             if (location == null) {
                 notFound.add(resource);
             } else {
-                NomadBooks.LOGGER.debug("resource: " + location);
+                NomadBooks.LOGGER.debug("resource: {}", location);
                 blocks.add(Registries.BLOCK.get(location));
             }
         }
         if (!notFound.isEmpty()) {
-            NomadBooks.LOGGER.debug(String.format(
-                "ResourceLocation(s) not found from config: %s. ",
-                String.join(", ", notFound)
-            ));
+            NomadBooks.LOGGER.debug(
+                "ResourceLocation(s) not found from config: %s. {}", notFound);
         }
 
         return blocks;
@@ -488,9 +486,8 @@ public class NomadBookItem extends Item implements DyeableItem {
      * Is the block replaceable in general
      */
     public static boolean isBlockReplaceable(BlockState blockState) {
-        // TODO re-add this
-//        List<Block> configBlocks = getBlocksFromStrings(NomadBooksYACLConfig.airReplaceable); // tmp
-        return blockState.isIn(ModTags.Blocks.IS_AIR_REPLACEABLE)/* || configBlocks.contains(blockState.getBlock())*/;
+        List<Block> configBlocks = getBlocksFromStrings(NomadBooksYACLConfig.airReplaceable); // tmp .. why did I call this tmp?
+        return blockState.isIn(ModTags.Blocks.IS_AIR_REPLACEABLE) || configBlocks.contains(blockState.getBlock());
     }
 
     /**
@@ -505,9 +502,8 @@ public class NomadBookItem extends Item implements DyeableItem {
      * Is the block displaceable
      */
     public static boolean isBlockDisplaceable(BlockState blockState) {
-        // TODO re-add this
-//        List<Block> configBlocks = getBlocksFromStrings(NomadBooksYACLConfig.notSpacialDisplaceable); // tmp
-        return !blockState.isIn(ModTags.Blocks.IS_NOT_DISPLACABLE) /*&& !configBlocks.contains(blockState.getBlock())*/;
+        List<Block> configBlocks = getBlocksFromStrings(NomadBooksYACLConfig.notSpacialDisplaceable); // tmp
+        return !blockState.isIn(ModTags.Blocks.IS_NOT_DISPLACABLE) && !configBlocks.contains(blockState.getBlock());
     }
 
     /**

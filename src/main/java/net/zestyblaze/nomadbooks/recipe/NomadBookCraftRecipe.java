@@ -33,8 +33,8 @@ public class NomadBookCraftRecipe extends SpecialCraftingRecipe {
 
     public static ItemStack getCraftResult() {
         ItemStack result = new ItemStack(ModItems.NOMAD_BOOK);
-        result.getOrCreateSubNbt(Constants.MODID).putInt(Constants.HEIGHT, 1);
-        result.getOrCreateSubNbt(Constants.MODID).putInt(Constants.WIDTH, 3);
+        result.getOrCreateSubNbt(Constants.MODID).putInt(Constants.HEIGHT, 1); // TODO make this configurable
+        result.getOrCreateSubNbt(Constants.MODID).putInt(Constants.WIDTH, 3); // TODO make this configurable
         result.getOrCreateSubNbt(Constants.MODID).putString(Constants.STRUCTURE, NomadBookItem.DEFAULT_STRUCTURE_PATH);
 
         return result;

@@ -1,25 +1,18 @@
 package net.zestyblaze.nomadbooks.recipe;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.ShapelessRecipe;
 import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 import net.zestyblaze.nomadbooks.NomadBooks;
 import net.zestyblaze.nomadbooks.item.BookUpgradeItem;
-import net.zestyblaze.nomadbooks.item.ModItems;
 import net.zestyblaze.nomadbooks.item.NomadBookItem;
 import net.zestyblaze.nomadbooks.util.Constants;
 

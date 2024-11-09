@@ -35,7 +35,7 @@ public class NomadBookHeightUpgradeRecipe extends SpecialCraftingRecipe {
     @Override
     public boolean matches(RecipeInputInventory container, World level) {
         ItemStack book = findItem(container, stack -> stack.getItem() instanceof NomadBookItem);
-        List<ItemStack> pageStacks = container.getInputStacks().stream()
+        List<ItemStack> pageStacks = container.getHeldStacks().stream()
             .filter(stack -> stack.getItem().equals(ModItems.GRASS_PAGE)).toList();
 
         return book != null && !pageStacks.isEmpty() && hasNoExtraItems(container, pageStacks.size()) &&
@@ -45,7 +45,7 @@ public class NomadBookHeightUpgradeRecipe extends SpecialCraftingRecipe {
     @Override
     public ItemStack craft(RecipeInputInventory container, DynamicRegistryManager registryAccess) {
         ItemStack book = findItem(container, stack -> stack.getItem() instanceof NomadBookItem);
-        List<Item> pageStacks = container.getInputStacks().stream()
+        List<Item> pageStacks = container.getHeldStacks().stream()
             .map(ItemStack::getItem)
             .filter(item -> item.equals(ModItems.GRASS_PAGE)).toList();
 

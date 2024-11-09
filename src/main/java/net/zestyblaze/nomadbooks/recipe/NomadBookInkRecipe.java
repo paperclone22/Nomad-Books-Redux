@@ -33,13 +33,13 @@ public class NomadBookInkRecipe extends SpecialCraftingRecipe {
 
     @Override
     public boolean matches(RecipeInputInventory container, World level) {
-        List<Item> ingredients = container.getInputStacks().stream()
+        List<Item> ingredients = container.getHeldStacks().stream()
             .map(ItemStack::getItem)
             .filter(item -> item.equals(Items.GHAST_TEAR) || item.equals(Items.CHARCOAL) || item.equals(Items.BLUE_DYE)).toList();
 
         ItemStack book = findItem(container, stack -> stack.getItem() instanceof NomadBookItem);
 
-        int emptySlots = container.getInputStacks().stream()
+        int emptySlots = container.getHeldStacks().stream()
             .filter(ItemStack::isEmpty)
             .toList().size();
         int allSlotsMinusFilledSlots = container.size() - 1 - ingredients.size();
@@ -52,13 +52,13 @@ public class NomadBookInkRecipe extends SpecialCraftingRecipe {
 
     @Override
     public ItemStack craft(RecipeInputInventory container, DynamicRegistryManager registryAccess) {
-        List<Item> ingredients = container.getInputStacks().stream()
+        List<Item> ingredients = container.getHeldStacks().stream()
             .map(ItemStack::getItem)
             .filter(item -> item.equals(Items.GHAST_TEAR) || item.equals(Items.CHARCOAL) || item.equals(Items.BLUE_DYE)).toList();
 
         ItemStack book = findItem(container, stack -> stack.getItem() instanceof NomadBookItem);
 
-        int emptySlots = container.getInputStacks().stream()
+        int emptySlots = container.getHeldStacks().stream()
             .filter(ItemStack::isEmpty)
             .toList().size();
         int allSlotsMinusFilledSlots = container.size() - 1 - ingredients.size();
@@ -71,7 +71,7 @@ public class NomadBookInkRecipe extends SpecialCraftingRecipe {
             int width = ret.getOrCreateSubNbt(Constants.MODID).getInt(Constants.WIDTH);
             NbtCompound tags = ret.getOrCreateSubNbt(Constants.MODID);
             tags.putBoolean(Constants.INKED, true);
-            tags.putInt(Constants.INK_GOAL, ((width + 2) * (width + 2) - width * width) / 3); // Determines the INK_GOAL
+            tags.putInt(Constants.INK_GOAL, ((width + 2) * (width + 2) - width * width) / 3); // Determines the INK_GOAL // TODO make this configurable ?
             tags.putInt(Constants.INK_PROGRESS, 0);
             return ret;
         }

@@ -26,7 +26,7 @@ public class DyeNomadBookRecipe extends SpecialCraftingRecipe {
 	@Override
 	public boolean matches(RecipeInputInventory container, World level) {
 		ItemStack book = findItem(container, stack -> stack.getItem() instanceof NomadBookItem);
-		List<DyeItem> dyes = container.getInputStacks().stream()
+		List<DyeItem> dyes = container.getHeldStacks().stream()
 				.map(ItemStack::getItem)
 				.filter(DyeItem.class::isInstance).map(DyeItem.class::cast).toList();
 
@@ -36,7 +36,7 @@ public class DyeNomadBookRecipe extends SpecialCraftingRecipe {
 	@Override
 	public ItemStack craft(RecipeInputInventory container, DynamicRegistryManager registryAccess) {
 		ItemStack book = findItem(container, stack -> stack.getItem() instanceof NomadBookItem);
-		List<DyeItem> dyes = container.getInputStacks().stream()
+		List<DyeItem> dyes = container.getHeldStacks().stream()
 				.map(ItemStack::getItem)
 				.filter(DyeItem.class::isInstance).map(DyeItem.class::cast).toList();
 		ItemStack ret = book != null ? book.copy() : ItemStack.EMPTY;

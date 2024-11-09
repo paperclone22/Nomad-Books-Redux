@@ -1,6 +1,5 @@
 package net.zestyblaze.nomadbooks;
 
-import joptsimple.internal.Classes;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
@@ -13,10 +12,7 @@ import net.minecraft.loot.function.SetNbtLootFunction;
 import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
 import net.minecraft.loot.provider.number.UniformLootNumberProvider;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.recipe.CraftingRecipe;
-import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.SpecialRecipeSerializer;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -41,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.Objects;
 
 import static net.zestyblaze.nomadbooks.util.Constants.MINECRAFT;
 
@@ -90,13 +85,12 @@ public class NomadBooks implements ModInitializer {
 		ModItems.registerCreativeTabs();
 
 		// Init Config\
-		// TODO re-add this
-//		try {
-//			NomadBooksYACLConfig.CONFIG.load();
-//		} catch (Exception ex) {
-//			LOGGER.error("Error loading Nomad Books config, restoring default", ex);
-//		}
-//		NomadBooksYACLConfig.CONFIG.save();
+		try {
+			NomadBooksYACLConfig.CONFIG.load();
+		} catch (Exception ex) {
+			LOGGER.error("Error loading Nomad Books config, restoring default", ex);
+		}
+		NomadBooksYACLConfig.CONFIG.save();
 
 		// Add Loot Tables
 		UniformLootNumberProvider lootTableRange = UniformLootNumberProvider.create(0, 1);
@@ -113,8 +107,8 @@ public class NomadBooks implements ModInitializer {
 				TREASURE_CHEST_LOOT_TABLE_ID, LootPool.builder().rolls(lootTableRange).with(ItemEntry.builder(ModItems.GRASS_PAGE)),
 				BONUS_CHEST_LOOT_TABLE_ID, LootPool.builder().rolls(ConstantLootNumberProvider.create(1)).with(ItemEntry.builder(ModItems.NOMAD_BOOK))
 						.apply(SetNbtLootFunction.builder(Util.make(new NbtCompound(), compoundTag -> compoundTag.put(Constants.MODID, Util.make(new NbtCompound(), child -> {
-							child.putInt(Constants.HEIGHT, 1);
-							child.putInt(Constants.WIDTH, 3);
+							child.putInt(Constants.HEIGHT, 1); // TODO config
+							child.putInt(Constants.WIDTH, 3); // TODO config
 							child.putString(Constants.STRUCTURE, NomadBookItem.DEFAULT_STRUCTURE_PATH);
 						})))).build())
 		);

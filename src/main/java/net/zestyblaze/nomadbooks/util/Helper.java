@@ -17,7 +17,7 @@ public class Helper {
 	 * Useful for searching inventories and constructing special recipes.
 	 */
 	public static ItemStack findItem(RecipeInputInventory container, Predicate<ItemStack> predicate) {
-		return container.getInputStacks().stream()
+		return container.getHeldStacks().stream()
 				.filter(predicate)
 				.findFirst()
 				.orElse(null); // do not use ItemStack.Empty here. it will mess up many checks
@@ -32,7 +32,7 @@ public class Helper {
 	 * Return true if all extra crafting slots are empty
 	 */
 	public static boolean hasNoExtraItems(RecipeInputInventory container, int myDesiredItemsAmount) {
-		int emptySlots = container.getInputStacks().stream()
+		int emptySlots = container.getHeldStacks().stream()
 				.filter(ItemStack::isEmpty)
 				.toList().size();
 		int allSlotsMinusFilledSlots = container.size() - 1 - myDesiredItemsAmount;

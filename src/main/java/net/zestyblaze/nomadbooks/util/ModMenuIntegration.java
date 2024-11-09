@@ -5,8 +5,8 @@ import com.terraformersmc.modmenu.api.ModMenuApi;
 
 public class ModMenuIntegration implements ModMenuApi {
 
-//	@Override
-//	public ConfigScreenFactory<?> getModConfigScreenFactory() {
-//		return parent -> Helper.isYACLLoaded() ? NomadBooksYACLConfig.createScreen(parent) : parent;
-//	}
+	@Override
+	public ConfigScreenFactory<?> getModConfigScreenFactory() {
+		return parent -> Helper.isYACLLoaded() ? NomadBooksYACLConfig.createScreen(parent) : parent;
+	}
 }
