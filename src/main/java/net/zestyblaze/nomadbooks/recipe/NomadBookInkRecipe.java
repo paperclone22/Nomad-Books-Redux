@@ -10,6 +10,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.ShapelessRecipe;
+import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.util.Identifier;
@@ -24,10 +25,10 @@ import java.util.List;
 
 import static net.zestyblaze.nomadbooks.util.Helper.findItem;
 
-public class NomadBookInkRecipe extends ShapelessRecipe {
-    public NomadBookInkRecipe(Identifier resourceLocation, CraftingRecipeCategory category) {
-        super(resourceLocation, "", category, new ItemStack(ModItems.NOMAD_BOOK),
-            DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofStacks(ModItems.NOMAD_BOOK.getDefaultStack(), ModItems.NETHER_NOMAD_BOOK.getDefaultStack()), Ingredient.ofItems(Items.GHAST_TEAR), Ingredient.ofItems(Items.CHARCOAL), Ingredient.ofItems(Items.BLUE_DYE)));
+public class NomadBookInkRecipe extends SpecialCraftingRecipe {
+    public NomadBookInkRecipe(/*Identifier resourceLocation, */CraftingRecipeCategory category) {
+        super(/*resourceLocation.toString(), */category/*, new ItemStack(ModItems.NOMAD_BOOK),*/
+            /*DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofStacks(ModItems.NOMAD_BOOK.getDefaultStack(), ModItems.NETHER_NOMAD_BOOK.getDefaultStack()), Ingredient.ofItems(Items.GHAST_TEAR), Ingredient.ofItems(Items.CHARCOAL), Ingredient.ofItems(Items.BLUE_DYE))*/);
     }
 
     @Override

@@ -43,7 +43,14 @@ repositories {
 
 	maven {
 		name 'Xander Maven'
-		url 'https://maven.isxander.dev/releases'
+		url 'https://maven.isxander.dev/releases/'
+	}
+	maven {
+		name 'Xander Snapshot'
+		url 'maven.isxander.dev/snapshots/'
+	}
+	flatDir {
+		dirs "libs"
 	}
 	mavenCentral()
 }
@@ -60,9 +67,14 @@ dependencies {
 
 //	Mod menu and YACL
 	modApi "com.terraformersmc:modmenu:${project.modmenu_version}"
-	modImplementation("dev.isxander:yet-another-config-lib:${project.yacl_version}") {
-		exclude(group: "net.fabricmc.fabric-api")
-	}
+//	modImplementation("dev.isxander:yet-another-config-lib:${project.yacl_version}") {
+//		exclude(group: "net.fabricmc.fabric-api")
+//	}
+//	modImplementation("dev.isxander.yacl:yet-another-config-lib-fabric:3.2.0+1.20.2+1.20.x.dev-SNAPSHOT+1.20.x.dev-SNAPSHOT") {
+//		exclude(group: "net.fabricmc.fabric-api")
+//	}
+//	modImplementation group: 'dev.isxander.yacl', name: 'yet-another-config-lib-fabric', version: '3.2.0+1.20.2'
+//	modImplementation "yet-another-config-lib-fabric-3.2.1+1.20.2"
 }
 
 processResources {

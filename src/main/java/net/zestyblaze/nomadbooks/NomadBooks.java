@@ -1,5 +1,6 @@
 package net.zestyblaze.nomadbooks;
 
+import joptsimple.internal.Classes;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
@@ -12,7 +13,10 @@ import net.minecraft.loot.function.SetNbtLootFunction;
 import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
 import net.minecraft.loot.provider.number.UniformLootNumberProvider;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.recipe.CraftingRecipe;
+import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeSerializer;
+import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.SpecialRecipeSerializer;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -37,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Objects;
 
 import static net.zestyblaze.nomadbooks.util.Constants.MINECRAFT;
 
@@ -61,13 +66,22 @@ public class NomadBooks implements ModInitializer {
 	public static final Block NOMAD_MUSHROOM_STEM = ModItems.registerBlock( "nomad_mushroom_stem", new NomadMushroomStemBlock(FabricBlockSettings.copyOf(Blocks.OAK_LOG).mapColor(MapColor.TERRACOTTA_WHITE).strength(0.6F, 0).sounds(BlockSoundGroup.WOOD).notSolid()));
 
 	// Register Mod Recipes
-	public static final RecipeSerializer<NomadBookCraftRecipe> CRAFT_NOMAD_BOOK = Registry.register(Registries.RECIPE_SERIALIZER, Constants.MODID + ":crafting_special_nomadbookcraft", new SpecialRecipeSerializer<>(NomadBookCraftRecipe::new));
-	public static final RecipeSerializer<NomadBookHeightUpgradeRecipe> UPGRADE_HEIGHT_NOMAD_BOOK = Registry.register(Registries.RECIPE_SERIALIZER, Constants.MODID + ":crafting_special_nomadbookupgradeheight", new SpecialRecipeSerializer<>(NomadBookHeightUpgradeRecipe::new));
-	public static final RecipeSerializer<NomadBookDismantleRecipe> DISMANTLE_NOMAD_BOOK = Registry.register(Registries.RECIPE_SERIALIZER, Constants.MODID + ":crafting_special_nomadbookdismantle", new SpecialRecipeSerializer<>(NomadBookDismantleRecipe::new)); // Special
-	public static final RecipeSerializer<NomadBookUpgradeRecipe> UPGRADE_NOMAD_BOOK = Registry.register(Registries.RECIPE_SERIALIZER, Constants.MODID + ":crafting_special_nomadbookupgrade", new SpecialRecipeSerializer<>(NomadBookUpgradeRecipe::new));
-	public static final RecipeSerializer<NomadBookInkRecipe> INK_NOMAD_BOOK = Registry.register(Registries.RECIPE_SERIALIZER, Constants.MODID + ":crafting_special_nomadbookink", new SpecialRecipeSerializer<>(NomadBookInkRecipe::new));
-	public static final RecipeSerializer<NetherNomadBookCraftRecipe> CRAFT_NETHER_NOMAD_BOOK = Registry.register(Registries.RECIPE_SERIALIZER, Constants.MODID + ":crafting_special_nethernomadbookcraft", new SpecialRecipeSerializer<>(NetherNomadBookCraftRecipe::new));
-	public static final RecipeSerializer<DyeNomadBookRecipe> DYE_NOMAD_BOOK = Registry.register(Registries.RECIPE_SERIALIZER, Constants.MODID + ":crafting_special_dyenomadbook", new SpecialRecipeSerializer<>(DyeNomadBookRecipe::new));
+
+// TODO does this work?
+//	public <T extends Recipe<?>> RecipeType<T> recipeTypeHelper(String name, Class<T> ob) { // NOSONAR
+//		return Registry.register(Registries.RECIPE_SERIALIZER,
+//		new Identifier(Constants.MODID, name).toString(),
+//		new SpecialRecipeSerializer<>(T::new)); // NOSONAR
+//	} // NOSONAR
+//	RecipeSerializer<NomadBookCraftRecipe> ass = recipeTypeHelper("ass", NomadBookCraftRecipe.class); // NOSONAR
+
+	public static final RecipeSerializer<NomadBookCraftRecipe> CRAFT_NOMAD_BOOK = Registry.register(Registries.RECIPE_SERIALIZER, new Identifier(Constants.MODID, "crafting_special_nomadbookcraft").toString(), new SpecialRecipeSerializer<>(NomadBookCraftRecipe::new));
+	public static final RecipeSerializer<NomadBookHeightUpgradeRecipe> UPGRADE_HEIGHT_NOMAD_BOOK = RecipeSerializer.register(new Identifier(Constants.MODID, "crafting_special_nomadbookupgradeheight").toString(), new SpecialRecipeSerializer<>(NomadBookHeightUpgradeRecipe::new));
+	public static final RecipeSerializer<NomadBookDismantleRecipe> DISMANTLE_NOMAD_BOOK = RecipeSerializer.register(new Identifier(Constants.MODID, "crafting_special_nomadbookdismantle").toString(), new SpecialRecipeSerializer<>(NomadBookDismantleRecipe::new)); // Special
+	public static final RecipeSerializer<NomadBookUpgradeRecipe> UPGRADE_NOMAD_BOOK = RecipeSerializer.register(new Identifier(Constants.MODID, "crafting_special_nomadbookupgrade").toString(), new SpecialRecipeSerializer<>(NomadBookUpgradeRecipe::new));
+	public static final RecipeSerializer<NomadBookInkRecipe> INK_NOMAD_BOOK = RecipeSerializer.register(new Identifier(Constants.MODID, "crafting_special_nomadbookink").toString(), new SpecialRecipeSerializer<>(NomadBookInkRecipe::new));
+	public static final RecipeSerializer<NetherNomadBookCraftRecipe> CRAFT_NETHER_NOMAD_BOOK = RecipeSerializer.register(new Identifier(Constants.MODID, "crafting_special_nethernomadbookcraft").toString(), new SpecialRecipeSerializer<>(NetherNomadBookCraftRecipe::new));
+	public static final RecipeSerializer<DyeNomadBookRecipe> DYE_NOMAD_BOOK = RecipeSerializer.register(new Identifier(Constants.MODID, "crafting_special_dyenomadbook").toString(), new SpecialRecipeSerializer<>(DyeNomadBookRecipe::new));
 	@Override
 	public void onInitialize() {
 		LOGGER.info(Constants.MODID + " Loaded");
@@ -75,13 +89,14 @@ public class NomadBooks implements ModInitializer {
 		// Register Mod Items and Creative Tab
 		ModItems.registerCreativeTabs();
 
-		// Init Config
-		try {
-			NomadBooksYACLConfig.CONFIG.load();
-		} catch (Exception ex) {
-			LOGGER.error("Error loading Nomad Books config, restoring default", ex);
-		}
-		NomadBooksYACLConfig.CONFIG.save();
+		// Init Config\
+		// TODO re-add this
+//		try {
+//			NomadBooksYACLConfig.CONFIG.load();
+//		} catch (Exception ex) {
+//			LOGGER.error("Error loading Nomad Books config, restoring default", ex);
+//		}
+//		NomadBooksYACLConfig.CONFIG.save();
 
 		// Add Loot Tables
 		UniformLootNumberProvider lootTableRange = UniformLootNumberProvider.create(0, 1);

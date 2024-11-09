@@ -9,6 +9,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.ShapelessRecipe;
+import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.util.Identifier;
@@ -24,11 +25,11 @@ import java.util.List;
 import static net.zestyblaze.nomadbooks.util.Helper.findItem;
 import static net.zestyblaze.nomadbooks.util.Helper.hasNoExtraItems;
 
-public class NomadBookHeightUpgradeRecipe extends ShapelessRecipe {
-    public NomadBookHeightUpgradeRecipe(Identifier id, CraftingRecipeCategory category) {
+public class NomadBookHeightUpgradeRecipe extends SpecialCraftingRecipe {
+    public NomadBookHeightUpgradeRecipe(/*Identifier id, */CraftingRecipeCategory category) {
         // I decided to switch to single page. Multiple pages still works, but it shows just 1 in the Recipe book (BUT IT SHOWS AT ALL)
-        super(id, "", category, new ItemStack(ModItems.NOMAD_BOOK), DefaultedList.copyOf(Ingredient.EMPTY,
-            Ingredient.ofStacks(ModItems.NOMAD_BOOK.getDefaultStack(), ModItems.NETHER_NOMAD_BOOK.getDefaultStack()), Ingredient.ofItems(ModItems.GRASS_PAGE)));
+        super(/*id, "", */category/*, new ItemStack(ModItems.NOMAD_BOOK), DefaultedList.copyOf(Ingredient.EMPTY,
+            Ingredient.ofStacks(ModItems.NOMAD_BOOK.getDefaultStack(), ModItems.NETHER_NOMAD_BOOK.getDefaultStack()), Ingredient.ofItems(ModItems.GRASS_PAGE))*/);
     }
 
     @Override
@@ -59,10 +60,9 @@ public class NomadBookHeightUpgradeRecipe extends ShapelessRecipe {
         return ItemStack.EMPTY;
     }
 
-    @Environment(EnvType.CLIENT)
     @Override
     public boolean fits(int width, int height) {
-        return width * height >= 2;
+        return width >= 3 && height >= 3;
     }
 
     @Override

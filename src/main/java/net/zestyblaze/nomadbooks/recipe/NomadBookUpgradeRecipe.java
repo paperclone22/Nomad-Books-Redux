@@ -11,6 +11,7 @@ import net.minecraft.nbt.NbtString;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.ShapelessRecipe;
+import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.util.Identifier;
@@ -25,11 +26,11 @@ import net.zestyblaze.nomadbooks.util.Constants;
 import static net.zestyblaze.nomadbooks.util.Helper.findItem;
 import static net.zestyblaze.nomadbooks.util.Helper.hasNoExtraItems;
 
-public class NomadBookUpgradeRecipe extends ShapelessRecipe {
-    public NomadBookUpgradeRecipe(Identifier resourceLocation, CraftingRecipeCategory category) {
+public class NomadBookUpgradeRecipe extends SpecialCraftingRecipe {
+    public NomadBookUpgradeRecipe(/*Identifier resourceLocation, */CraftingRecipeCategory category) {
         // TODO make a Tag for the upgrade pages
-        super(resourceLocation, "", category, new ItemStack(ModItems.NOMAD_BOOK),
-            DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofStacks(ModItems.NOMAD_BOOK.getDefaultStack(), ModItems.NETHER_NOMAD_BOOK.getDefaultStack()), Ingredient.ofItems(ModItems.AQUATIC_MEMBRANE_PAGE, ModItems.MYCELIUM_PAGE, ModItems.SPACIAL_DISPLACER_PAGE)));
+        super(/*resourceLocation.toString(), */category/*, new ItemStack(ModItems.NOMAD_BOOK),*/
+            /*DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofStacks(ModItems.NOMAD_BOOK.getDefaultStack(), ModItems.NETHER_NOMAD_BOOK.getDefaultStack()), Ingredient.ofItems(ModItems.AQUATIC_MEMBRANE_PAGE, ModItems.MYCELIUM_PAGE, ModItems.SPACIAL_DISPLACER_PAGE))*/);
     }
 
     @Override
@@ -65,10 +66,9 @@ public class NomadBookUpgradeRecipe extends ShapelessRecipe {
         return ((BookUpgradeItem) itemStack.getItem()).getUpgrade();
     }
 
-    @Environment(EnvType.CLIENT)
     @Override
     public boolean fits(int width, int height) {
-        return width * height >= 2;
+        return width >= 3 && height >= 3;
     }
 
     @Override

@@ -1,7 +1,5 @@
 package net.zestyblaze.nomadbooks.recipe;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.DyeItem;
 import net.minecraft.item.DyeableItem;
@@ -10,7 +8,6 @@ import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import net.zestyblaze.nomadbooks.NomadBooks;
 import net.zestyblaze.nomadbooks.item.NomadBookItem;
@@ -22,8 +19,8 @@ import static net.zestyblaze.nomadbooks.util.Helper.hasNoExtraItems;
 
 public class DyeNomadBookRecipe extends SpecialCraftingRecipe {
 	// see https://github.com/Lythom/capsule/blob/a1881ed43d9445ed48c31caa7710e2979359ed19/src/main/java/capsule/recipes/DyeCapsuleRecipe.java#L98
-	public DyeNomadBookRecipe(Identifier id, CraftingRecipeCategory category) {
-		super(id, category);
+	public DyeNomadBookRecipe(CraftingRecipeCategory category) {
+		super(category);
 	}
 
 	@Override
@@ -47,10 +44,9 @@ public class DyeNomadBookRecipe extends SpecialCraftingRecipe {
 		return !ret.isEmpty() && !dyes.isEmpty() && hasNoExtraItems(container, dyes.size()) ? DyeableItem.blendAndSetColor(ret, dyes) : ItemStack.EMPTY;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean fits(int width, int height) {
-		return width * height >= 2;
+		return width >= 3 && height >= 3;
 	}
 
 	@Override

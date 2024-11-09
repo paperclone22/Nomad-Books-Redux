@@ -42,8 +42,7 @@
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
     "minecraft": $compatible_minecraft_versions,
-    "java": ">=17",
-    "yet_another_config_lib_v3": "*"
+    "java": ">=17"
   },
   "suggests": {
     "another-mod": "*"

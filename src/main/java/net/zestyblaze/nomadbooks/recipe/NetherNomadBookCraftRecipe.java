@@ -10,6 +10,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.ShapelessRecipe;
+import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.util.Identifier;
@@ -23,10 +24,10 @@ import net.zestyblaze.nomadbooks.util.Constants;
 import static net.zestyblaze.nomadbooks.util.Helper.findItem;
 import static net.zestyblaze.nomadbooks.util.Helper.hasNoExtraItems;
 
-public class NetherNomadBookCraftRecipe extends ShapelessRecipe {
-    public NetherNomadBookCraftRecipe(Identifier resourceLocation, CraftingRecipeCategory category) {
-        super(resourceLocation, "", category, getCraftResult(),
-            DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofStacks(ModItems.NOMAD_BOOK.getDefaultStack()), Ingredient.ofItems(Items.NETHERITE_INGOT)));
+public class NetherNomadBookCraftRecipe extends SpecialCraftingRecipe {
+    public NetherNomadBookCraftRecipe(/*Identifier resourceLocation, */CraftingRecipeCategory category) {
+        super(/*resourceLocation.toString(), */category/*, getCraftResult(),*/
+            /*DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofStacks(ModItems.NOMAD_BOOK.getDefaultStack()), Ingredient.ofItems(Items.NETHERITE_INGOT))*/);
     }
 
     public static ItemStack getCraftResult() {

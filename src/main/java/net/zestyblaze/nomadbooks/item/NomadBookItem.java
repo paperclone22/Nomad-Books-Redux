@@ -129,7 +129,7 @@ public class NomadBookItem extends Item implements DyeableItem {
         // check if there's enough space
         BlockBox campVolume = BlockBox.create(pos, pos.add(width - 1, height - 1, width - 1));
         int spaceY;
-        int maxChecks = NomadBooksYACLConfig.checksAboveOnDeploy;
+        int maxChecks = 2/*NomadBooksYACLConfig.checksAboveOnDeploy*/; // TODO re-add this
         for (spaceY=0; spaceY <= maxChecks; spaceY++) {
             if (hasEnoughSpace(world, campVolume.offset(0,spaceY,0), hasAquaticMembrane, hasSpacialDisplacer)) { // 🟦🟫 check
                 pos = pos.up(spaceY);
@@ -488,8 +488,9 @@ public class NomadBookItem extends Item implements DyeableItem {
      * Is the block replaceable in general
      */
     public static boolean isBlockReplaceable(BlockState blockState) {
-        List<Block> configBlocks = getBlocksFromStrings(NomadBooksYACLConfig.airReplaceable); // tmp
-        return blockState.isIn(ModTags.Blocks.IS_AIR_REPLACEABLE) || configBlocks.contains(blockState.getBlock());
+        // TODO re-add this
+//        List<Block> configBlocks = getBlocksFromStrings(NomadBooksYACLConfig.airReplaceable); // tmp
+        return blockState.isIn(ModTags.Blocks.IS_AIR_REPLACEABLE)/* || configBlocks.contains(blockState.getBlock())*/;
     }
 
     /**
@@ -504,8 +505,9 @@ public class NomadBookItem extends Item implements DyeableItem {
      * Is the block displaceable
      */
     public static boolean isBlockDisplaceable(BlockState blockState) {
-        List<Block> configBlocks = getBlocksFromStrings(NomadBooksYACLConfig.notSpacialDisplaceable); // tmp
-        return !blockState.isIn(ModTags.Blocks.IS_NOT_DISPLACABLE) && !configBlocks.contains(blockState.getBlock());
+        // TODO re-add this
+//        List<Block> configBlocks = getBlocksFromStrings(NomadBooksYACLConfig.notSpacialDisplaceable); // tmp
+        return !blockState.isIn(ModTags.Blocks.IS_NOT_DISPLACABLE) /*&& !configBlocks.contains(blockState.getBlock())*/;
     }
 
     /**
