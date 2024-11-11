@@ -95,7 +95,7 @@ The Spacial Displacer Page allows the camp to fit in small places. Moves terrain
 
 ##### Nether Nomad Book
 
-By combining the Nomad Book with a netherite ingot in an usual crafting grid the dropped item won't be destroyed in lava and instead swims up in it, similar to netherite ingots, tools and armour.
+By combining the Nomad Book with a netherite ingot in a crafting grid the dropped item won't be destroyed in lava and instead swims up in it, similar to netherite ingots, tools and armour.
 
 ![NetherNomadBookRecipe](./README.assets/nether-book.jpg)
 

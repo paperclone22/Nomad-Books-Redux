@@ -15,7 +15,7 @@ public class ModBlockTagProvider extends FabricTagProvider.BlockTagProvider {
 	}
 
 	@Override
-	protected void configure(RegistryWrapper.WrapperLookup arg) { // TODO NOTE:{This is datagen, the real info is in *.json} add a config to disable the use of this tag. OR just move these item to the config
+	protected void configure(RegistryWrapper.WrapperLookup arg) { // NOTE:{This is datagen, the real info is in *.json}. These tags exist because I want it to be difficult for players to remove them. eg. Vanilla functionality works best with them in these lists. For those reading the configs, pretend these tags don't exist
 		getOrCreateTagBuilder(ModTags.Blocks.IS_AIR_REPLACEABLE)
 				.add(Blocks.AIR, Blocks.CAVE_AIR, Blocks.VOID_AIR, Blocks.CRIMSON_ROOTS, Blocks.DEAD_BUSH, Blocks.FERN, Blocks.FIRE, Blocks.GLOW_LICHEN, Blocks.SHORT_GRASS, Blocks.HANGING_ROOTS, Blocks.LARGE_FERN, Blocks.LAVA, Blocks.LIGHT, Blocks.NETHER_SPROUTS, Blocks.SNOW, Blocks.SOUL_FIRE, Blocks.STRUCTURE_VOID, Blocks.TALL_GRASS, Blocks.VINE, Blocks.WARPED_ROOTS)
 				.forceAddTag(BlockTags.REPLACEABLE)

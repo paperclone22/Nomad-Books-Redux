@@ -47,9 +47,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import static net.zestyblaze.nomadbooks.util.Helper.convertAABBtoBoundingBox;
 
@@ -95,7 +97,7 @@ public class NomadBookItem extends Item implements DyeableItem {
 
         // Stock Flags
         NbtCompound tags = context.getStack().getOrCreateSubNbt(Constants.MODID);
-        boolean isDeployed = context.getStack().getOrCreateNbt().getFloat(Constants.DEPLOYED) == 1f; // is deployed
+        boolean isDeployed = context.getStack().getNbt().getFloat(Constants.DEPLOYED) == 1f; // is deployed ? (getFloat returns 0.0f if doesn't exist)
         World world = context.getWorld();
         PlayerEntity player = Objects.requireNonNull(context.getPlayer());
         String structurePath = tags.getString(Constants.STRUCTURE);
@@ -145,7 +147,7 @@ public class NomadBookItem extends Item implements DyeableItem {
         if (hasFungiSupport) { // 🟪 check
             buildMushroomPlatform(world, pos, width); // 🟪 do
         }
-        if (!isSurfaceValid(world, pos, width)) { // if the surface is already valid then nothing in here matters  // TODO Need to simplify this
+        if (!isSurfaceValid(world, pos, width)) { // if the surface is already valid then nothing in here matters // TODO Need to simplify this
             boolean foundValid = false;
             if (!hasFungiSupport && hasSpacialDisplacer) { // under the upgrade condition !fs && sd , we check if we can move down to find a flat surface
                 for (int i = 0; i < width/2; i++) { // we check down based on half the width of the camp rounded up. so wider camps can drop farther
@@ -303,7 +305,7 @@ public class NomadBookItem extends Item implements DyeableItem {
     public TypedActionResult<ItemStack> use(@NotNull World world, PlayerEntity user, @NotNull Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
         NbtCompound tags = itemStack.getOrCreateSubNbt(Constants.MODID);
-        boolean isDeployed = itemStack.getOrCreateNbt().getFloat(Constants.DEPLOYED) == 1f;
+        boolean isDeployed = itemStack.getNbt().getFloat(Constants.DEPLOYED) == 1f;
 
         if (!isDeployed) { // if camp isn't deployed, this use() method is not to be used. so use() is meant to retrieve a camp + other things
             return TypedActionResult.fail(itemStack);
@@ -321,6 +323,10 @@ public class NomadBookItem extends Item implements DyeableItem {
         if (teleportToCampHandler(tags, world, user, pos, width)) { // teleport to camp. not shifting. and either tp will ender-pearls or too far message. else try retrieve below.
             return TypedActionResult.success(itemStack);
         }
+        // Validate no blocks are in the blacklist
+        if(!containsValidBlocks(user, world, pos, width, height)) {
+            return TypedActionResult.fail(itemStack);
+        }
         if (createStructureIfDefaultOrRetrieve(tags, structurePath, user, world, pos, width, height)) { // Create a new structure or retrieve the camp. only false on error
             // set undeployed
             itemStack.getOrCreateNbt().putFloat(Constants.DEPLOYED, 0F);
@@ -335,6 +341,23 @@ public class NomadBookItem extends Item implements DyeableItem {
         return TypedActionResult.fail(itemStack);
     }
 
+    private boolean containsValidBlocks(PlayerEntity user, World world, BlockPos pos, int width, int height) {
+        Set<Block> notifyList = new HashSet<>();
+        if (!world.isClient) {
+            BlockBox campVolume = BlockBox.create(pos, new Vec3i(pos.getX() + width - 1, pos.getY() + height - 1, pos.getZ() + width - 1));
+            BlockPos.stream(campVolume).forEach(bp -> {
+                BlockState blockState = world.getBlockState(bp);
+                if ( !isBlockAllowedInCamp(blockState) ) {
+                    notifyList.add(blockState.getBlock());
+                }
+            });
+            if (!notifyList.isEmpty()) {
+                user.sendMessage(Text.translatable("info.nomadbooks.notify_blacklist", notifyList.toString()), false);
+            }
+        }
+        return  notifyList.isEmpty();
+    }
+
     private void placeTerrainWithSpacialDisplacer(NbtCompound tags, World world, BlockPos pos, int width) {
 
         String structurePath = tags.getString(Constants.STRUCTURE) + Constants.DISPLACED;
@@ -342,7 +365,7 @@ public class NomadBookItem extends Item implements DyeableItem {
         if (tags.getList(Constants.UPGRADES, NbtElement.STRING_TYPE).contains(NbtString.of(Constants.SPACIAL_DISPLACER))
         && !world.isClient()) {
             // Place the structure
-            placeStructure(world, structurePath, pos, width, true); // TODO should I add checks for if the player upgraded the camp size? TEST With Spacial Displacer
+            placeStructure(world, structurePath, pos, width, true); // TODO should I add checks for if the player upgraded the camp size? TEST With Spacial Displacer. ok I need to prevent the camp from expanding if it's deployed (while player is changing biomes?)... it is an uncommon edge-case so I'm going to procrastinate and leave this for later
         }
     }
 
@@ -395,7 +418,6 @@ public class NomadBookItem extends Item implements DyeableItem {
             List<String> path = Arrays.asList(user.getUuid().toString(), String.valueOf(System.currentTimeMillis()));
             structurePath = new Identifier(Constants.MODID, Strings.join(path, "/")).toString();
             NomadBooks.LOGGER.info("Creating Structure (Server thread): {}", structurePath);
-            tags.putString(Constants.STRUCTURE, structurePath);
         }
         // Server-side logic
         if (!world.isClient) {
@@ -405,13 +427,14 @@ public class NomadBookItem extends Item implements DyeableItem {
             BlockPos.stream(campVolume).forEach(bp -> {
                 BlockState blockState = world.getBlockState(bp);
                 if (blockState.getBlock() instanceof BedBlock) {
-                    world.setBlockState(bp, blockState.with(BedBlock.OCCUPIED, false), Block.NOTIFY_LISTENERS);
+                    world.setBlockState(bp, blockState.with(BedBlock.OCCUPIED, false), Block.NOTIFY_NEIGHBORS + Block.NOTIFY_LISTENERS);
                 }
             });
             // Save the structure
             StructureTemplate structure;
             try {
                 structure = structureTemplateManager.getTemplateOrBlank(new Identifier(structurePath));
+                tags.putString(Constants.STRUCTURE, structurePath);
             } catch (InvalidIdentifierException e) {
                 NomadBooks.LOGGER.error("Error creating or retrieving structure: {}", e.getMessage());
                 return false; // 🟧  Return false on error
@@ -430,11 +453,11 @@ public class NomadBookItem extends Item implements DyeableItem {
     private void removeBlocks(NbtCompound tags, World world, BlockPos pos, int width, int height) {
         // clear block entities && remove blocks using BoundingBox
         BlockBox campVolume = BlockBox.create(pos, new Vec3i(pos.getX()+width-1, pos.getY()+height-1, pos.getZ()+width-1));
-        // TODO when I add a blacklist it will need some checks here-ish
         BlockPos.stream(campVolume).forEach(bp -> { // NOTE: this is what the fill command does
             // clear block entities && remove blocks
             world.removeBlockEntity(bp);
             world.setBlockState(bp, Blocks.AIR.getDefaultState(), Block.NOTIFY_NEIGHBORS + Block.NOTIFY_LISTENERS + Block.FORCE_STATE + Block.SKIP_DROPS); // idk what 255 would do. I just guessed when I put it
+            world.updateNeighbors(bp, Blocks.AIR);
         });
         // if membrane upgrade, remove membrane
         if (tags.getList(Constants.UPGRADES, NbtElement.STRING_TYPE).contains(NbtString.of(Constants.AQUATIC_MEMBRANE))) {
@@ -495,7 +518,7 @@ public class NomadBookItem extends Item implements DyeableItem {
      * Is the block replaceable in general
      */
     public static boolean isBlockReplaceable(BlockState blockState) {
-        List<Block> configBlocks = getBlocksFromStrings(NomadBooksYACLConfig.airReplaceable); // tmp .. why did I call this tmp?
+        List<Block> configBlocks = getBlocksFromStrings(NomadBooksYACLConfig.airReplaceable);
         return blockState.isIn(ModTags.Blocks.IS_AIR_REPLACEABLE) || configBlocks.contains(blockState.getBlock());
     }
 
@@ -511,8 +534,16 @@ public class NomadBookItem extends Item implements DyeableItem {
      * Is the block displaceable
      */
     public static boolean isBlockDisplaceable(BlockState blockState) {
-        List<Block> configBlocks = getBlocksFromStrings(NomadBooksYACLConfig.notSpacialDisplaceable); // tmp
-        return !blockState.isIn(ModTags.Blocks.IS_NOT_DISPLACEABLE) && !configBlocks.contains(blockState.getBlock());
+        List<Block> configBlocks = getBlocksFromStrings(NomadBooksYACLConfig.notSpacialDisplaceable);
+        return !blockState.isIn(ModTags.Blocks.IS_NOT_DISPLACEABLE) && isBlockAllowedInCamp(blockState) && !configBlocks.contains(blockState.getBlock());
+    }
+
+    /**
+     * is the block <b>NOT</b> contained in the camp blacklist
+     */
+    public static boolean isBlockAllowedInCamp(BlockState blockState) {
+        List<Block> configBlocks = getBlocksFromStrings(NomadBooksYACLConfig.campBlocksBlacklist);
+        return !configBlocks.contains(blockState.getBlock());
     }
 
     /**
@@ -527,7 +558,7 @@ public class NomadBookItem extends Item implements DyeableItem {
      * Set a block to water at a given position
      */
     public void setBlockWater(World world, BlockPos blockPos) {
-        world.setBlockState(blockPos, Blocks.WATER.getDefaultState(), Block.NOTIFY_NEIGHBORS + Block.NOTIFY_LISTENERS + Block.SKIP_DROPS); // TODO I should really make some sort of flag handler for all this stuff
+        world.setBlockState(blockPos, Blocks.WATER.getDefaultState(), Block.NOTIFY_NEIGHBORS + Block.NOTIFY_LISTENERS + Block.SKIP_DROPS);
     }
 
     // End of 3 Util methods

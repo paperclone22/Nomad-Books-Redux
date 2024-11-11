@@ -23,6 +23,7 @@
   "info.nomadbooks.display_boundaries_on": "Display camp boundaries: ON",
   "info.nomadbooks.display_boundaries_off": "Display camp boundaries: OFF",
   "info.nomadbooks.itinerant_ink_done": "You have travelled enough for the itinerant ink to write a new page! Your nomad book now has a width of %s.",
+  "info.nomadbooks.notify_blacklist": "Player must manually remove blacklisted blocks from camp: %s",
   "upgrade.nomadbooks.aquatic_membrane": "Aquatic Membrane",
   "upgrade.nomadbooks.fungi_support": "Fungi Support",
   "upgrade.nomadbooks.spacial_displacer": "Spacial Displacer",
@@ -32,5 +33,7 @@
   "nomadbooks.yacl.air_replaceable": "Air Replaceable",
   "nomadbooks.yacl.air_replaceable.desc": "Additional blocks to add to the Air Replaceable list (comma separated Item IDs)",
   "nomadbooks.yacl.not_spacial_displaceable": "Not Spacial Displaceable",
-  "nomadbooks.yacl.not_spacial_displaceable.desc": "Blocks that should never be displaced as Terrain (comma separated Item IDs)"
+  "nomadbooks.yacl.not_spacial_displaceable.desc": "Blocks that should never be displaced as Terrain (comma separated Item IDs)",
+  "nomadbooks.yacl.camp_blocks_blacklist": "Blacklist blocks within camp",
+  "nomadbooks.yacl.camp_blocks_blacklist.desc": "Blacklist of block_ids that the camp won't pick up"
 }

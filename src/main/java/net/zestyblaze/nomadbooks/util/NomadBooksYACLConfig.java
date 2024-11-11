@@ -17,6 +17,8 @@ import net.minecraft.text.Text;
 
 import java.util.List;
 
+import static net.zestyblaze.nomadbooks.util.Constants.MINECRAFT_YACL;
+
 public class NomadBooksYACLConfig { // NOSONAR
 
 	public static final ConfigClassHandler<NomadBooksYACLConfig> CONFIG = ConfigClassHandler.createBuilder(NomadBooksYACLConfig.class)
@@ -31,12 +33,13 @@ public class NomadBooksYACLConfig { // NOSONAR
 	public static int checksAboveOnDeploy = 2; // NOSONAR
 	@SuppressWarnings("final")
 	@SerialEntry(comment = "List of additional blocks that will be treated as air")
-	public static List<String> airReplaceable = Lists.newArrayList("minecraft:poppy", "minecraft:dandelion"); // NOSONAR
+	public static List<String> airReplaceable = Lists.newArrayList("minecraft:allium", "minecraft:azure_bluet", "minecraft:blue_orchid", "minecraft:cornflower", "minecraft:dandelion", "minecraft:lilac", "minecraft:lily_of_the_valley", "minecraft:orange_tulip", "minecraft:oxeye_daisy", "minecraft:peony", "minecraft:pink_tulip", "minecraft:poppy", "minecraft:red_tulip", "minecraft:rose_bush", "minecraft:sunflower", "minecraft:torchflower", "minecraft:white_tulip", "minecraft:wither_rose"); // NOSONAR
 	@SuppressWarnings("final")
-	@SerialEntry(comment = "List of additional blocks that will be prevent displacement")
-	public static List<String> notSpacialDisplaceable = Lists.newArrayList(); // NOSONAR
-
-	// TODO some sort of blacklist: https://github.com/Ladysnake/Nomad-Books/issues/42
+	@SerialEntry(comment = "List of additional blocks that will be prevent displacement. Also contains the camp blocks blacklist")
+	public static List<String> notSpacialDisplaceable = Lists.newArrayList("minecraft:nether_portal", "minecraft:obsidian"); // NOSONAR // I added nether_portal & obsidian here because its an easy and common player built structure that could be used as a protection block to prevent displacement. they would still be available to be created inside a camp. // NOTE: notSpacialDisplaceable includes campBlocksBlacklist. eg. anything that can't be included in a structure, shouldn't be treated as terrain and shouldn't be moved
+	@SuppressWarnings("final")
+	@SerialEntry(comment = "Blacklist of blocks that won't be saved into a camp/structure")
+	public  static List<String> campBlocksBlacklist = Lists.newArrayList("minecraft:bedrock", "minecraft:end_gateway", "minecraft:end_portal_frame", "minecraft:barrier", "minecraft:command_block", "minecraft:chain_command_block", "minecraft:repeating_command_block", "minecraft:jigsaw", "minecraft:light", "minecraft:structure_block"); // NOSONAR
 
 	/** @noinspection AccessStaticViaInstance*/
 	public static Screen createScreen(Screen parent) {
@@ -56,7 +59,7 @@ public class NomadBooksYACLConfig { // NOSONAR
 								.name(Text.translatable("nomadbooks.yacl.air_replaceable"))
 								.description(OptionDescription.of(Text.translatable("nomadbooks.yacl.air_replaceable.desc")))
 								.binding(defaults.airReplaceable, () -> config.airReplaceable, newVal -> config.airReplaceable = newVal) // NOSONAR
-								.initial("minecraft:")
+								.initial(MINECRAFT_YACL)
 								.insertEntriesAtEnd(true)
 								.controller(StringControllerBuilder::create)
 								.build())
@@ -64,7 +67,15 @@ public class NomadBooksYACLConfig { // NOSONAR
 								.name(Text.translatable("nomadbooks.yacl.not_spacial_displaceable"))
 								.description(OptionDescription.of(Text.translatable("nomadbooks.yacl.not_spacial_displaceable.desc")))
 								.binding(defaults.notSpacialDisplaceable, () -> config.notSpacialDisplaceable, newVal -> config.notSpacialDisplaceable = newVal) // NOSONAR
-								.initial("minecraft:")
+								.initial(MINECRAFT_YACL)
+								.insertEntriesAtEnd(true)
+								.controller(StringControllerBuilder::create)
+								.build())
+						.option(ListOption.<String>createBuilder()
+								.name(Text.translatable("nomadbooks.yacl.camp_blocks_blacklist"))
+								.description(OptionDescription.of(Text.translatable("nomadbooks.yacl.camp_blocks_blacklist.desc")))
+								.binding(defaults.campBlocksBlacklist, () -> config.campBlocksBlacklist, newVal -> config.campBlocksBlacklist = newVal) // NOSONAR
+								.initial(MINECRAFT_YACL)
 								.insertEntriesAtEnd(true)
 								.controller(StringControllerBuilder::create)
 								.build())

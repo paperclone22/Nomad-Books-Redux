@@ -21,7 +21,6 @@ import static net.zestyblaze.nomadbooks.util.Helper.hasNoExtraItems;
 
 public class NomadBookUpgradeRecipe extends SpecialCraftingRecipe {
     public NomadBookUpgradeRecipe(/*Identifier resourceLocation, */CraftingRecipeCategory category) {
-        // TODO make a Tag for the upgrade pages
         super(/*resourceLocation.toString(), */category/*, new ItemStack(ModItems.NOMAD_BOOK),*/
             /*DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofStacks(ModItems.NOMAD_BOOK.getDefaultStack(), ModItems.NETHER_NOMAD_BOOK.getDefaultStack()), Ingredient.ofItems(ModItems.AQUATIC_MEMBRANE_PAGE, ModItems.MYCELIUM_PAGE, ModItems.SPACIAL_DISPLACER_PAGE))*/);
     }

@@ -6,6 +6,7 @@ public class Constants {
 
 	public static final String MODID = "nomadbooks";
 	public static final String MINECRAFT = "minecraft";
+	public static final String MINECRAFT_YACL = "minecraft:";
 	public static final String HEIGHT = "Height";
 	public static final String WIDTH = "Width";
 	public static final String STRUCTURE = "Structure";
