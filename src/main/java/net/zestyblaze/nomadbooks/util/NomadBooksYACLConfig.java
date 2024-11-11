@@ -36,6 +36,8 @@ public class NomadBooksYACLConfig { // NOSONAR
 	@SerialEntry(comment = "List of additional blocks that will be prevent displacement")
 	public static List<String> notSpacialDisplaceable = Lists.newArrayList(); // NOSONAR
 
+	// TODO some sort of blacklist: https://github.com/Ladysnake/Nomad-Books/issues/42
+
 	/** @noinspection AccessStaticViaInstance*/
 	public static Screen createScreen(Screen parent) {
 		return YetAnotherConfigLib.create(CONFIG, ((defaults, config, builder) -> builder

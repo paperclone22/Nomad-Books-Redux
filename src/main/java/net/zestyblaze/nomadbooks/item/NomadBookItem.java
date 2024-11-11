@@ -126,7 +126,7 @@ public class NomadBookItem extends Item implements DyeableItem {
         // -----------------------------------
 
         // Upgrades, Checks and Func
-        // check if there's enough space
+        // check for places that may have space, and moves to that available space
         BlockBox campVolume = BlockBox.create(pos, pos.add(width - 1, height - 1, width - 1));
         int spaceY;
         int maxChecks = NomadBooksYACLConfig.checksAboveOnDeploy;
@@ -145,10 +145,10 @@ public class NomadBookItem extends Item implements DyeableItem {
         if (hasFungiSupport) { // 🟪 check
             buildMushroomPlatform(world, pos, width); // 🟪 do
         }
-        if (!isSurfaceValid(world, pos, width)) {
+        if (!isSurfaceValid(world, pos, width)) { // if the surface is already valid then nothing in here matters  // TODO Need to simplify this
             boolean foundValid = false;
-            if (!hasFungiSupport && hasSpacialDisplacer) {
-                for (int i = 0; i < width/2; i++) {
+            if (!hasFungiSupport && hasSpacialDisplacer) { // under the upgrade condition !fs && sd , we check if we can move down to find a flat surface
+                for (int i = 0; i < width/2; i++) { // we check down based on half the width of the camp rounded up. so wider camps can drop farther
                     if (isSurfaceValid(world, pos.down(i+1), width)) {
                         pos = pos.down(i+1);
                         campVolume = campVolume.offset(0, -i-1, 0);
@@ -157,6 +157,7 @@ public class NomadBookItem extends Item implements DyeableItem {
                     }
                 }
             }
+            // check if there's enough space (if we had to move)
             if ( !hasEnoughSpace(world, campVolume, hasAquaticMembrane, hasSpacialDisplacer) ) {
                 player.sendMessage(Text.translatable("error.nomadbooks.no_space"), true);
                 return ActionResult.FAIL;
@@ -170,9 +171,9 @@ public class NomadBookItem extends Item implements DyeableItem {
         BlockBox fungiCapMovementCheck = new BlockBox(pos.getX(), pos.getY() -1, pos.getZ(), pos.getX() +width -1, pos.getY() -1, pos.getZ() +width -1);
         Vec3i minPos = new Vec3i((width-1)/2 +pos.getX() -1, pos.getY() -5, (width-1)/2 +pos.getZ() -1);
         Vec3i maxPos = new Vec3i((width-1)/2 +pos.getX() +1, pos.getY() -2, (width-1)/2 +pos.getZ() +1);
-        BlockBox fungiStem = BlockBox.create(minPos, maxPos);
+        BlockBox fungiStemCheck = BlockBox.create(minPos, maxPos);
         if (fungiCapMovementCheck.intersects(convertAABBtoBoundingBox(player.getBoundingBox()))
-        || fungiStem.intersects(convertAABBtoBoundingBox(player.getBoundingBox()))) {
+        || fungiStemCheck.intersects(convertAABBtoBoundingBox(player.getBoundingBox()))) {
             player.requestTeleport(player.getX(), pos.getY(), player.getZ());
         }
         // if membrane upgrade, replace water and underwater plants with membrane
@@ -188,13 +189,12 @@ public class NomadBookItem extends Item implements DyeableItem {
                 .filter(bp -> isBlockUnderwaterReplaceable(world.getBlockState(bp)))
                 .forEach(bp -> {
                     world.breakBlock(bp, true);
-                    world.setBlockState(bp, NomadBooks.MEMBRANE.getDefaultState(), 2);
+                    world.setBlockState(bp, NomadBooks.MEMBRANE.getDefaultState(), Block.NOTIFY_NEIGHBORS + Block.NOTIFY_LISTENERS);
                 }));
         }
         // Save the Terrain as a structure using SPACIAL_DISPLACER
         if (hasSpacialDisplacer && !world.isClient()) { // 🟫 check + do --V
-            ServerWorld serverLevel = (ServerWorld) world;
-            StructureTemplateManager structureTemplateManager = serverLevel.getStructureTemplateManager();
+            StructureTemplateManager structureTemplateManager = ((ServerWorld) world).getStructureTemplateManager();
             // Save the structure
             StructureTemplate structure;
             try {
@@ -207,11 +207,17 @@ public class NomadBookItem extends Item implements DyeableItem {
             structure.setAuthor(player.getNameForScoreboard());
             structureTemplateManager.saveTemplate(new Identifier(structurePath + Constants.DISPLACED)); // added DISPLACED
         }
-        // destroy destroyable blocks in the way
-        BlockPos.stream(campVolume).forEach(bp -> world.setBlockState(bp, Blocks.AIR.getDefaultState(), 2));
         // Place the structure
         if (!world.isClient()) {
-            placeStructure(world, structurePath, pos, width);
+            if (!hasSpacialDisplacer) {
+                BlockPos.stream(campVolume)
+                    .filter(bp -> isBlockReplaceable(world.getBlockState(bp))) // save drops from flowers, etc.
+                    .forEach(bp -> {
+                        world.breakBlock(bp, true);
+                        world.setBlockState(bp, Blocks.AIR.getDefaultState(), Block.NOTIFY_NEIGHBORS + Block.NOTIFY_LISTENERS);
+                    });
+            }
+            placeStructure(world, structurePath, pos, width, hasSpacialDisplacer);
         }
         // set deployed, register nbt
         context.getStack().getOrCreateNbt().putFloat(Constants.DEPLOYED, 1F); // set is deployed
@@ -258,7 +264,7 @@ public class NomadBookItem extends Item implements DyeableItem {
             BlockState bs = level.getBlockState(bp);
             if (isBlockReplaceable(bs) || isBlockUnderwaterReplaceable(bs)) {
                 level.breakBlock(bp, true);
-                level.setBlockState(bp, NomadBooks.NOMAD_MUSHROOM_BLOCK.getDefaultState(), 2);
+                level.setBlockState(bp, NomadBooks.NOMAD_MUSHROOM_BLOCK.getDefaultState(), Block.NOTIFY_NEIGHBORS + Block.NOTIFY_LISTENERS);
             }
         });
         Vec3i minPos = new Vec3i((width-1)/2 +pos.getX() -1, pos.getY() -5, (width-1)/2 +pos.getZ() -1);
@@ -267,19 +273,23 @@ public class NomadBookItem extends Item implements DyeableItem {
         BlockPos.stream(fungiStem).forEach(bp -> {
             if (isBlockReplaceable(level.getBlockState(bp)) || isBlockUnderwaterReplaceable(level.getBlockState(bp))) {
                 level.breakBlock(bp, true);
-                level.setBlockState(bp, NomadBooks.NOMAD_MUSHROOM_STEM.getDefaultState(), 2);
+                level.setBlockState(bp, NomadBooks.NOMAD_MUSHROOM_STEM.getDefaultState(), Block.NOTIFY_NEIGHBORS + Block.NOTIFY_LISTENERS);
             }
         });
     }
 
-    private void placeStructure(World level, String structurePath, BlockPos pos, int width) {
+    private void placeStructure(World level, String structurePath, BlockPos pos, int width, boolean hasSpacialDisplacer) {
         ServerWorld serverLevel = (ServerWorld) level;
         Optional<StructureTemplate> structure = serverLevel.getStructureTemplateManager().getTemplate(new Identifier(structurePath));
 
         if (structure.isPresent()) {
             int offsetWidth = (width - structure.get().getSize().getX()) / 2;
-            StructurePlacementData placementData = new StructurePlacementData().setIgnoreEntities(true);
-            structure.get().place(serverLevel, pos.add(offsetWidth, 0, offsetWidth), pos.add(offsetWidth, 0, offsetWidth), placementData, serverLevel.getRandom(), 2); // Bingo
+            StructurePlacementData placementData = new StructurePlacementData().setIgnoreEntities(true); // This would be false if when I make an entity mover upgrade. would need to kill anything in the area after saving in Use method
+            if (hasSpacialDisplacer) {
+                structure.get().place(serverLevel, pos.add(offsetWidth, 0, offsetWidth), pos.add(offsetWidth, 0, offsetWidth), placementData, serverLevel.getRandom(), Block.NOTIFY_LISTENERS + Block.FORCE_STATE + Block.SKIP_DROPS);
+            } else {
+                structure.get().place(serverLevel, pos.add(offsetWidth, 0, offsetWidth), pos.add(offsetWidth, 0, offsetWidth), placementData, serverLevel.getRandom(), Block.NOTIFY_LISTENERS + Block.FORCE_STATE); // Bingo
+            }
         }
     }
 
@@ -304,7 +314,7 @@ public class NomadBookItem extends Item implements DyeableItem {
         int width = tags.getInt(Constants.WIDTH);
         String structurePath = tags.getString(Constants.STRUCTURE);
 
-        if (user.isSneaking()) {
+        if (user.isSneaking()) { // TODO if I add logic like this in the UseOn method, I could allow for rotation of the structure 90 degrees
             toggleBoundaries(user, tags);
             return TypedActionResult.pass(itemStack);
         }
@@ -332,7 +342,7 @@ public class NomadBookItem extends Item implements DyeableItem {
         if (tags.getList(Constants.UPGRADES, NbtElement.STRING_TYPE).contains(NbtString.of(Constants.SPACIAL_DISPLACER))
         && !world.isClient()) {
             // Place the structure
-            placeStructure(world, structurePath, pos, width); // TODO should I add checks for if the player upgraded the camp size?
+            placeStructure(world, structurePath, pos, width, true); // TODO should I add checks for if the player upgraded the camp size? TEST With Spacial Displacer
         }
     }
 
@@ -389,14 +399,13 @@ public class NomadBookItem extends Item implements DyeableItem {
         }
         // Server-side logic
         if (!world.isClient) {
-            ServerWorld serverLevel = (ServerWorld) world;
-            StructureTemplateManager structureTemplateManager = serverLevel.getStructureTemplateManager();
+            StructureTemplateManager structureTemplateManager = ((ServerWorld) world).getStructureTemplateManager();
             // Free beds from being occupied
             BlockBox campVolume = BlockBox.create(pos, new Vec3i(pos.getX()+width-1, pos.getY()+height-1, pos.getZ()+width-1));
             BlockPos.stream(campVolume).forEach(bp -> {
                 BlockState blockState = world.getBlockState(bp);
                 if (blockState.getBlock() instanceof BedBlock) {
-                    world.setBlockState(bp, blockState.with(BedBlock.OCCUPIED, false), 2);
+                    world.setBlockState(bp, blockState.with(BedBlock.OCCUPIED, false), Block.NOTIFY_LISTENERS);
                 }
             });
             // Save the structure
@@ -407,7 +416,7 @@ public class NomadBookItem extends Item implements DyeableItem {
                 NomadBooks.LOGGER.error("Error creating or retrieving structure: {}", e.getMessage());
                 return false; // 🟧  Return false on error
             }
-            structure.saveFromWorld(world, pos.add(new BlockPos(0, 0, 0)), new BlockPos(width, height, width), true, Blocks.STRUCTURE_VOID);
+            structure.saveFromWorld(world, pos.add(new BlockPos(0, 0, 0)), new BlockPos(width, height, width), true, Blocks.STRUCTURE_VOID); // STRUCTURE_VOID is being ignored. treat it like air. No idea why I'm including entities
             structure.setAuthor(user.getNameForScoreboard());
             structureTemplateManager.saveTemplate(new Identifier(structurePath));
         }
@@ -421,18 +430,18 @@ public class NomadBookItem extends Item implements DyeableItem {
     private void removeBlocks(NbtCompound tags, World world, BlockPos pos, int width, int height) {
         // clear block entities && remove blocks using BoundingBox
         BlockBox campVolume = BlockBox.create(pos, new Vec3i(pos.getX()+width-1, pos.getY()+height-1, pos.getZ()+width-1));
+        // TODO when I add a blacklist it will need some checks here-ish
         BlockPos.stream(campVolume).forEach(bp -> { // NOTE: this is what the fill command does
             // clear block entities && remove blocks
             world.removeBlockEntity(bp);
-            world.setBlockState(bp, Blocks.AIR.getDefaultState(), 255);
-            world.updateNeighbors(bp, Blocks.AIR);
+            world.setBlockState(bp, Blocks.AIR.getDefaultState(), Block.NOTIFY_NEIGHBORS + Block.NOTIFY_LISTENERS + Block.FORCE_STATE + Block.SKIP_DROPS); // idk what 255 would do. I just guessed when I put it
         });
         // if membrane upgrade, remove membrane
         if (tags.getList(Constants.UPGRADES, NbtElement.STRING_TYPE).contains(NbtString.of(Constants.AQUATIC_MEMBRANE))) {
             BlockBox membraneVolume = new BlockBox(pos.getX()-1, pos.getY()-1, pos.getZ()-1, pos.getX()+width, pos.getY()+height, pos.getZ()+width);
             BlockPos.stream(membraneVolume).forEach(bp -> {
                 if (world.getBlockState(bp).getBlock().equals(NomadBooks.MEMBRANE)) {
-                    removeBlock(world, bp);
+                    setBlockWater(world, bp);
                 }
             });
         }
@@ -503,7 +512,7 @@ public class NomadBookItem extends Item implements DyeableItem {
      */
     public static boolean isBlockDisplaceable(BlockState blockState) {
         List<Block> configBlocks = getBlocksFromStrings(NomadBooksYACLConfig.notSpacialDisplaceable); // tmp
-        return !blockState.isIn(ModTags.Blocks.IS_NOT_DISPLACABLE) && !configBlocks.contains(blockState.getBlock());
+        return !blockState.isIn(ModTags.Blocks.IS_NOT_DISPLACEABLE) && !configBlocks.contains(blockState.getBlock());
     }
 
     /**
@@ -511,7 +520,14 @@ public class NomadBookItem extends Item implements DyeableItem {
      * Actually sets it to Air
      */
     public void removeBlock(World world, BlockPos blockPos) {
-        world.setBlockState(blockPos, Blocks.AIR.getDefaultState(), 2);
+        world.setBlockState(blockPos, Blocks.AIR.getDefaultState(), Block.NOTIFY_NEIGHBORS + Block.NOTIFY_LISTENERS + Block.FORCE_STATE);
+    }
+
+    /**
+     * Set a block to water at a given position
+     */
+    public void setBlockWater(World world, BlockPos blockPos) {
+        world.setBlockState(blockPos, Blocks.WATER.getDefaultState(), Block.NOTIFY_NEIGHBORS + Block.NOTIFY_LISTENERS + Block.SKIP_DROPS); // TODO I should really make some sort of flag handler for all this stuff
     }
 
     // End of 3 Util methods

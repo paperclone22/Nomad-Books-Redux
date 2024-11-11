@@ -14,7 +14,7 @@ public class ModTags {
 		private Blocks() {}
 		public static final TagKey<Block> IS_AIR_REPLACEABLE = createTag("replaceable_to_air");
 		public static final TagKey<Block> IS_WATER_REPLACEABLE = createTag("replaceable_to_water");
-		public static final TagKey<Block> IS_NOT_DISPLACABLE = createTag("terrain_not_displaceable");
+		public static final TagKey<Block> IS_NOT_DISPLACEABLE = createTag("terrain_not_displaceable");
 
 		private static TagKey<Block> createTag(String name) {
 			return TagKey.of(Registries.BLOCK.getKey(), new Identifier(Constants.MODID, name));

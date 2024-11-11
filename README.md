@@ -1,34 +1,25 @@
 # Nomad Books
 
-[//]: # (TODO take screenshots to replace the ones removed from the readme)
-
 [![License](https://img.shields.io/badge/license-GPL%203.0-orange)](https://github.com/paperclone22/Nomad-Books-Redux?tab=GPL-3.0-2-ov-file)
 [![Fabric Mod Loader](https://img.shields.io/badge/Mod%20Loader-Fabric-lightyellow)](https://fabricmc.net/)
 [![Github Stars](https://img.shields.io/github/stars/paperclone22/Nomad-Books-Redux)](https://github.com/paperclone22/Nomad-Books-Redux)
 
-[//]: # (![[ImmediatelyFast]&#40;https://modrinth.com/mod/immediatelyfast&#41;]&#40;https://img.shields.io/badge/dynamic/json?color=158000&label=downloads&prefix=+%20&query=downloads&url=https://api.modrinth.com/v2/project/5ZwdcRci&logo=modrinth&#41;)
-
-[//]: # ([![img]&#40;https://img.shields.io/discord/292744693803122688?color=informational&label=Ladysnake&logo=Discord&#41;]&#40;https://ladysnake.glitch.me&#41;)
-
-[//]: # ([![img]&#40;http://cf.way2muchnoise.eu/full_rats-mischief_downloads.svg&#41;]&#40;https://www.curseforge.com/minecraft/mc-mods/nomad-books&#41;)
-
-[//]: # ([![img]&#40;http://cf.way2muchnoise.eu/versions/minecraft_nomad-books_latest.svg&#41;]&#40;https://www.curseforge.com/minecraft/mc-mods/nomad-books&#41;)
-
-**Nomad Books** is a Minecraft Fabric mod that introduces a solution for players that are always adventuring around their world. Nomad books and pages allow these players to store their camp in the form of an item and redeploy it whenever and wherever they wish.
+**Nomad Books** is a Minecraft Fabric mod that introduces a solution for players that are always traveling around their world. Nomad books and pages allow these players to store their camp in the form of an item and redeploy it whenever and wherever they wish.
 
 ## Wiki
 
 ### Nomad Books
 
-A nomad book is an item that can store a 3x1x3 sized camp. The book displays a campfire as indicator if the camp is deployed (campfire absent) or not (campfire visible).
+A nomad book is an item that can store a 3x1x3 sized camp (default size). The book displays as unlocked if the camp is deployed or locked if it is stored. A Nomad Book can be upgraded to store a larger space.
 
-![deployed](./README.assets/retrieved.jpg)
-![retrieved](./README.assets/deployed.jpg)
+**Deployed | Retrieved**
+
+![deployed](./README.assets/deployed.jpg)
+![retrieved](./README.assets/retrieved.jpg)
 
 To **deploy** a camp simply find a flat spot with sufficient space blocked by nothing but plants (grass, flowers, vines,...) and snow and use the nomad book where you want the centre of your camp to be.
 
 To **retrieve** a camp the player needs to be in a 10 block radius to the centre and use the book again. If you are too far away from the camp to retrieve it you can hold enderpearls in your offhand while using the book to teleport back to the centre of the camp at the cost of one enderpearl per 60 blocks of distance travelled.
-
 
 Shift-using with the nomad books will reveal the boundaries of the camp.
 
