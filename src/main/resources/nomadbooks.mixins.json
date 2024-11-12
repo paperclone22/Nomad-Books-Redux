@@ -3,6 +3,7 @@
   "package": "net.zestyblaze.nomadbooks.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "PlayerManagerMixin",
     "ServerPlayerMixin"
   ],
   "client": [

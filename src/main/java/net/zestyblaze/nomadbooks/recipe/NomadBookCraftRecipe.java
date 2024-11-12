@@ -17,15 +17,17 @@ import net.zestyblaze.nomadbooks.util.Constants;
 import java.util.List;
 
 import static net.zestyblaze.nomadbooks.NomadBooks.CRAFT_NOMAD_BOOK;
+import static net.zestyblaze.nomadbooks.util.NomadBooksYACLConfig.defaultStandardBookHeight;
+import static net.zestyblaze.nomadbooks.util.NomadBooksYACLConfig.defaultStandardBookWidth;
 
 public class NomadBookCraftRecipe extends SpecialCraftingRecipe {
 
-    public static final List<Item> NOMAD_BOOK_RECIPE_1 = Lists.newArrayList(
+    protected static final List<Item> NOMAD_BOOK_RECIPE_1 = Lists.newArrayList(
             Items.AIR, Items.CAMPFIRE, Items.AIR,
             ModItems.GRASS_PAGE, ModItems.GRASS_PAGE, ModItems.GRASS_PAGE,
             Items.AIR, Items.AIR, Items.AIR
     );
-    public static final List<Item> NOMAD_BOOK_RECIPE_2 = Lists.newArrayList(
+    protected static final List<Item> NOMAD_BOOK_RECIPE_2 = Lists.newArrayList(
             Items.AIR, Items.AIR, Items.AIR,
             Items.AIR, Items.CAMPFIRE, Items.AIR,
             ModItems.GRASS_PAGE, ModItems.GRASS_PAGE, ModItems.GRASS_PAGE
@@ -33,8 +35,8 @@ public class NomadBookCraftRecipe extends SpecialCraftingRecipe {
 
     public static ItemStack getCraftResult() {
         ItemStack result = new ItemStack(ModItems.NOMAD_BOOK);
-        result.getOrCreateSubNbt(Constants.MODID).putInt(Constants.HEIGHT, 1); // TODO make this configurable
-        result.getOrCreateSubNbt(Constants.MODID).putInt(Constants.WIDTH, 3); // TODO make this configurable
+        result.getOrCreateSubNbt(Constants.MODID).putInt(Constants.HEIGHT, defaultStandardBookHeight);
+        result.getOrCreateSubNbt(Constants.MODID).putInt(Constants.WIDTH, defaultStandardBookWidth);
         result.getOrCreateSubNbt(Constants.MODID).putString(Constants.STRUCTURE, NomadBookItem.DEFAULT_STRUCTURE_PATH);
 
         return result;

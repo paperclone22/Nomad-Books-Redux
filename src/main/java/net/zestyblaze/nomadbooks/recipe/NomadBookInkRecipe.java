@@ -7,17 +7,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.ShapelessRecipe;
 import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 import net.zestyblaze.nomadbooks.NomadBooks;
-import net.zestyblaze.nomadbooks.item.ModItems;
 import net.zestyblaze.nomadbooks.item.NomadBookItem;
 import net.zestyblaze.nomadbooks.util.Constants;
 
@@ -71,7 +66,7 @@ public class NomadBookInkRecipe extends SpecialCraftingRecipe {
             int width = ret.getOrCreateSubNbt(Constants.MODID).getInt(Constants.WIDTH);
             NbtCompound tags = ret.getOrCreateSubNbt(Constants.MODID);
             tags.putBoolean(Constants.INKED, true);
-            tags.putInt(Constants.INK_GOAL, ((width + 2) * (width + 2) - width * width) / 3); // Determines the INK_GOAL // TODO make this configurable ?
+            tags.putInt(Constants.INK_GOAL, ((width + 2) * (width + 2) - width * width) / 3); // Determines the INK_GOAL
             tags.putInt(Constants.INK_PROGRESS, 0);
             return ret;
         }

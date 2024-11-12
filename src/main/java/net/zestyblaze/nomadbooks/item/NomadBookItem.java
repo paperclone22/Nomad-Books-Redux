@@ -54,6 +54,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import static net.zestyblaze.nomadbooks.util.Helper.convertAABBtoBoundingBox;
+import static net.zestyblaze.nomadbooks.util.NomadBooksYACLConfig.defaultStandardBookHeight;
+import static net.zestyblaze.nomadbooks.util.NomadBooksYACLConfig.defaultStandardBookWidth;
 
 public class NomadBookItem extends Item implements DyeableItem {
     public static final int CAMP_RETRIEVAL_RADIUS = 20;
@@ -71,8 +73,8 @@ public class NomadBookItem extends Item implements DyeableItem {
         super.getDefaultStack();
         ItemStack itemStack = new ItemStack(this);
         NbtCompound tags = itemStack.getOrCreateSubNbt(Constants.MODID);
-        tags.putInt(Constants.HEIGHT, 1);
-        tags.putInt(Constants.WIDTH, 3);
+        tags.putInt(Constants.HEIGHT, defaultStandardBookHeight);
+        tags.putInt(Constants.WIDTH, defaultStandardBookWidth);
         tags.putString(Constants.STRUCTURE, DEFAULT_STRUCTURE_PATH);
         return itemStack;
     }
@@ -97,12 +99,26 @@ public class NomadBookItem extends Item implements DyeableItem {
 
         // Stock Flags
         NbtCompound tags = context.getStack().getOrCreateSubNbt(Constants.MODID);
-        boolean isDeployed = context.getStack().getNbt().getFloat(Constants.DEPLOYED) == 1f; // is deployed ? (getFloat returns 0.0f if doesn't exist)
+        boolean isDeployed = context.getStack().getOrCreateNbt().getFloat(Constants.DEPLOYED) == 1f; // is deployed ? (getFloat returns 0.0f if doesn't exist)
         World world = context.getWorld();
         PlayerEntity player = Objects.requireNonNull(context.getPlayer());
         String structurePath = tags.getString(Constants.STRUCTURE);
         int height = tags.getInt(Constants.HEIGHT);
         int width = tags.getInt(Constants.WIDTH);
+
+        // if you don't have tags for whatever reason, this fixes that
+        if (height == 0) {
+            tags.putInt(Constants.HEIGHT, defaultStandardBookHeight);
+            height = tags.getInt(Constants.HEIGHT);
+        }
+        if(width == 0) {
+            tags.putInt(Constants.WIDTH, defaultStandardBookWidth);
+            width = tags.getInt(Constants.WIDTH);
+        }
+        if (structurePath.equals("")) {
+            tags.putString(Constants.STRUCTURE, DEFAULT_STRUCTURE_PATH);
+            structurePath = tags.getString(Constants.STRUCTURE);
+        }
         //---------------------------
 
         // Setup Logic / Checks
@@ -305,7 +321,7 @@ public class NomadBookItem extends Item implements DyeableItem {
     public TypedActionResult<ItemStack> use(@NotNull World world, PlayerEntity user, @NotNull Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
         NbtCompound tags = itemStack.getOrCreateSubNbt(Constants.MODID);
-        boolean isDeployed = itemStack.getNbt().getFloat(Constants.DEPLOYED) == 1f;
+        boolean isDeployed = itemStack.getOrCreateNbt().getFloat(Constants.DEPLOYED) == 1f;
 
         if (!isDeployed) { // if camp isn't deployed, this use() method is not to be used. so use() is meant to retrieve a camp + other things
             return TypedActionResult.fail(itemStack);
