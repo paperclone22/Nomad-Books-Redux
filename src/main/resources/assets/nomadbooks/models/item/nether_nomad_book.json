@@ -9,7 +9,7 @@
 	"overrides": [
 		{
 			"predicate": {
-				"nomadbooks:deployed": 1
+				"nomadbooks:deployed": 1.0
 			},
 			"model": "nomadbooks:item/nether_nomad_book_deployed"
 		}

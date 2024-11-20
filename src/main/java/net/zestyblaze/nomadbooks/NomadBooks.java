@@ -6,13 +6,13 @@ import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.MapColor;
+import net.minecraft.component.DataComponentType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootPool;
 import net.minecraft.loot.entry.ItemEntry;
-import net.minecraft.loot.function.SetNbtLootFunction;
+import net.minecraft.loot.function.SetComponentsLootFunction;
 import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
 import net.minecraft.loot.provider.number.UniformLootNumberProvider;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialRecipeSerializer;
 import net.minecraft.registry.Registries;
@@ -21,26 +21,25 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
 import net.zestyblaze.nomadbooks.block.MembraneBlock;
 import net.zestyblaze.nomadbooks.block.NomadMushroomBlock;
 import net.zestyblaze.nomadbooks.block.NomadMushroomStemBlock;
 import net.zestyblaze.nomadbooks.item.ModItems;
 import net.zestyblaze.nomadbooks.item.NomadBookItem;
-import net.zestyblaze.nomadbooks.recipe.DyeNomadBookRecipe;
-import net.zestyblaze.nomadbooks.recipe.NetherNomadBookCraftRecipe;
-import net.zestyblaze.nomadbooks.recipe.NomadBookCraftRecipe;
 import net.zestyblaze.nomadbooks.recipe.NomadBookDismantleRecipe;
 import net.zestyblaze.nomadbooks.recipe.NomadBookHeightUpgradeRecipe;
-import net.zestyblaze.nomadbooks.recipe.NomadBookInkRecipe;
 import net.zestyblaze.nomadbooks.recipe.NomadBookUpgradeRecipe;
 import net.zestyblaze.nomadbooks.util.Constants;
+import net.zestyblaze.nomadbooks.util.NomadBooksComponent;
 import net.zestyblaze.nomadbooks.util.NomadBooksYACLConfig;
+import net.zestyblaze.nomadbooks.util.NomadInkComponent;
 import net.zestyblaze.nomadbooks.util.PlayerFirstJoinCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 
 import static net.zestyblaze.nomadbooks.util.Constants.MINECRAFT;
 import static net.zestyblaze.nomadbooks.util.NomadBooksYACLConfig.defaultStandardBookHeight;
@@ -68,13 +67,21 @@ public class NomadBooks implements ModInitializer {
 	public static final Block NOMAD_MUSHROOM_STEM = ModItems.registerBlock( "nomad_mushroom_stem", new NomadMushroomStemBlock(FabricBlockSettings.copyOf(Blocks.OAK_LOG).mapColor(MapColor.TERRACOTTA_WHITE).strength(0.6F, 0).sounds(BlockSoundGroup.WOOD).notSolid()));
 
 	// Register Mod Recipes
-	public static final RecipeSerializer<NomadBookCraftRecipe> CRAFT_NOMAD_BOOK = Registry.register(Registries.RECIPE_SERIALIZER, new Identifier(Constants.MODID, "crafting_special_nomadbookcraft").toString(), new SpecialRecipeSerializer<>(NomadBookCraftRecipe::new));
 	public static final RecipeSerializer<NomadBookHeightUpgradeRecipe> UPGRADE_HEIGHT_NOMAD_BOOK = RecipeSerializer.register(new Identifier(Constants.MODID, "crafting_special_nomadbookupgradeheight").toString(), new SpecialRecipeSerializer<>(NomadBookHeightUpgradeRecipe::new));
 	public static final RecipeSerializer<NomadBookDismantleRecipe> DISMANTLE_NOMAD_BOOK = RecipeSerializer.register(new Identifier(Constants.MODID, "crafting_special_nomadbookdismantle").toString(), new SpecialRecipeSerializer<>(NomadBookDismantleRecipe::new)); // Special
 	public static final RecipeSerializer<NomadBookUpgradeRecipe> UPGRADE_NOMAD_BOOK = RecipeSerializer.register(new Identifier(Constants.MODID, "crafting_special_nomadbookupgrade").toString(), new SpecialRecipeSerializer<>(NomadBookUpgradeRecipe::new));
-	public static final RecipeSerializer<NomadBookInkRecipe> INK_NOMAD_BOOK = RecipeSerializer.register(new Identifier(Constants.MODID, "crafting_special_nomadbookink").toString(), new SpecialRecipeSerializer<>(NomadBookInkRecipe::new));
-	public static final RecipeSerializer<NetherNomadBookCraftRecipe> CRAFT_NETHER_NOMAD_BOOK = RecipeSerializer.register(new Identifier(Constants.MODID, "crafting_special_nethernomadbookcraft").toString(), new SpecialRecipeSerializer<>(NetherNomadBookCraftRecipe::new));
-	public static final RecipeSerializer<DyeNomadBookRecipe> DYE_NOMAD_BOOK = RecipeSerializer.register(new Identifier(Constants.MODID, "crafting_special_dyenomadbook").toString(), new SpecialRecipeSerializer<>(DyeNomadBookRecipe::new));
+
+	// Register Components
+		private static <T> DataComponentType<T> register(Identifier id, UnaryOperator<DataComponentType.Builder<T>> builderOperator) {
+			return Registry.register(Registries.DATA_COMPONENT_TYPE, id, builderOperator.apply(DataComponentType.builder()).build());
+		}
+
+	public static final DataComponentType<NomadBooksComponent> NOMAD_BOOK_DATA = register(
+			new Identifier(Constants.MODID, "nomad_book_data"), builder -> builder.codec(NomadBooksComponent.CODEC).packetCodec(NomadBooksComponent.PACKET_CODEC).cache()
+	);
+	public static final DataComponentType<NomadInkComponent> NOMAD_INK_DATA = register(
+			new Identifier(Constants.MODID, "nomad_ink_data"), builder -> builder.codec(NomadInkComponent.CODEC).packetCodec(NomadInkComponent.PACKET_CODEC).cache()
+	);
 
 	@Override
 	public void onInitialize() {
@@ -92,7 +99,7 @@ public class NomadBooks implements ModInitializer {
 		NomadBooksYACLConfig.CONFIG.save();
 
 		// Add Loot Tables
-		UniformLootNumberProvider lootTableRange = UniformLootNumberProvider.create(0, 1);
+		UniformLootNumberProvider lootTableRange = UniformLootNumberProvider.create(0.4f, 1);
 		UniformLootNumberProvider strongholdRange = UniformLootNumberProvider.create(1, 5);
 
 		// Map the pool names with our loot additions
@@ -104,20 +111,22 @@ public class NomadBooks implements ModInitializer {
 				STRONGHOLD_LIBRARY_CHEST_LOOT_TABLE_ID, LootPool.builder().rolls(strongholdRange).with(ItemEntry.builder(ModItems.GRASS_PAGE)),
 				TEMPLE_CHEST_LOOT_TABLE_ID, LootPool.builder().rolls(lootTableRange).with(ItemEntry.builder(ModItems.GRASS_PAGE)),
 				TREASURE_CHEST_LOOT_TABLE_ID, LootPool.builder().rolls(lootTableRange).with(ItemEntry.builder(ModItems.GRASS_PAGE)),
-				BONUS_CHEST_LOOT_TABLE_ID, LootPool.builder().rolls(ConstantLootNumberProvider.create(1)).with(ItemEntry.builder(ModItems.NOMAD_BOOK))
-						.apply(SetNbtLootFunction.builder(Util.make(new NbtCompound(), compoundTag -> compoundTag.put(Constants.MODID, Util.make(new NbtCompound(), child -> {
-							child.putInt(Constants.HEIGHT, defaultStandardBookHeight);
-							child.putInt(Constants.WIDTH, defaultStandardBookWidth);
-							child.putString(Constants.STRUCTURE, NomadBookItem.DEFAULT_STRUCTURE_PATH);
-						})))).build())
+				BONUS_CHEST_LOOT_TABLE_ID, LootPool.builder().rolls(ConstantLootNumberProvider.create(1)).with(ItemEntry.builder(ModItems.NOMAD_BOOK)
+						.apply(SetComponentsLootFunction.builder(NOMAD_BOOK_DATA, new NomadBooksComponent(false, false, defaultStandardBookHeight, defaultStandardBookWidth, NomadBookItem.DEFAULT_STRUCTURE_PATH, List.of()))))
+						.apply(SetComponentsLootFunction.builder(NOMAD_INK_DATA, new NomadInkComponent(false, 0, 0, List.of())))
 		);
 
 		// Using our map, edit the loot pools
-		lootTableConfigurations.forEach((id, poolBuilder) -> LootTableEvents.MODIFY.register((resourceManager, lootManager, tableId, supplier, setter) -> {
-			if (id.equals(tableId)) {
-				supplier.pool(poolBuilder);
-			}
-		}));
+		LootTableEvents.MODIFY.register((key, tableBuilder, source) -> {
+					String stringId = key.getValue().toString();
+					if (!stringId.startsWith("minecraft:chests")) {
+						return;
+					}
+					if (lootTableConfigurations.containsKey(key.getValue())) {
+						tableBuilder.pool(lootTableConfigurations.get(key.getValue()));
+					}
+				}
+		);
 
 		// Add a book to every player's inventory on first join
 		if (doStartWithBook) {
@@ -127,9 +136,8 @@ public class NomadBooks implements ModInitializer {
 
 	private void playerJoined(ServerPlayerEntity player, MinecraftServer minecraftServer) {
 		ItemStack book = new ItemStack(ModItems.NOMAD_BOOK);
-		book.getOrCreateSubNbt(Constants.MODID).putInt(Constants.HEIGHT, defaultStandardBookHeight);
-		book.getOrCreateSubNbt(Constants.MODID).putInt(Constants.WIDTH, defaultStandardBookWidth);
-		book.getOrCreateSubNbt(Constants.MODID).putString(Constants.STRUCTURE, NomadBookItem.DEFAULT_STRUCTURE_PATH);
+		book.set(NOMAD_BOOK_DATA, new NomadBooksComponent(false, false, defaultStandardBookHeight, defaultStandardBookWidth, NomadBookItem.DEFAULT_STRUCTURE_PATH, List.of()));
+		book.set(NOMAD_INK_DATA, new NomadInkComponent(false, 0, 0, List.of()));
 		player.getInventory().insertStack(book);
 	}
 

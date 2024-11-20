@@ -1,0 +1,39 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "F": [
+      {
+        "item": "minecraft:campfire"
+      },
+      {
+        "item": "minecraft:soul_campfire"
+      }
+    ],
+    "P": {
+      "item": "nomadbooks:grass_page"
+    }
+  },
+  "pattern": [
+    " F ",
+    "PPP"
+  ],
+  "result": {
+    "components": {
+      "nomadbooks:nomad_book_data": {
+        "is_deployed": false,
+        "do_display_boundaries": false,
+        "height": 1,
+        "width": 3,
+        "structure": "nomadbooks:campfire3x1x3",
+        "upgrades_flagged": []
+      },
+      "nomadbooks:nomad_ink_data": {
+        "is_inked": false,
+        "ink_progress": 0,
+        "ink_goal": 0,
+        "visited_biomes": []
+      }
+    },
+    "id": "nomadbooks:nomad_book"
+  }
+}

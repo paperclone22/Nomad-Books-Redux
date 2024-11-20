@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": {
+    "item": "minecraft:blue_dye"
+  },
+  "base": {
+    "item": "nomadbooks:nether_nomad_book"
+  },
+  "result": {
+    "components": {
+      "nomadbooks:nomad_ink_data": {
+        "is_inked": true,
+        "ink_progress": 0,
+        "ink_goal": 0,
+        "visited_biomes": []
+      }
+    },
+    "count": 1,
+    "id": "nomadbooks:nether_nomad_book"
+  },
+  "template": {
+    "item": "minecraft:ghast_tear"
+  }
+}

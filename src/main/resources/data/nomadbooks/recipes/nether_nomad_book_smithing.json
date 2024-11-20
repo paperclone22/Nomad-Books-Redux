@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": {
+    "item": "minecraft:netherite_ingot"
+  },
+  "base": {
+    "item": "nomadbooks:nomad_book"
+  },
+  "result": {
+    "count": 1,
+    "id": "nomadbooks:nether_nomad_book"
+  },
+  "template": {
+    "item": "minecraft:paper"
+  }
+}

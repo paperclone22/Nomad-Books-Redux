@@ -1,72 +1,67 @@
 package net.zestyblaze.nomadbooks.recipe;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.ShapelessRecipe;
 import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.world.World;
 import net.zestyblaze.nomadbooks.NomadBooks;
 import net.zestyblaze.nomadbooks.item.ModItems;
 import net.zestyblaze.nomadbooks.item.NomadBookItem;
-import net.zestyblaze.nomadbooks.util.Constants;
+import net.zestyblaze.nomadbooks.util.NomadBooksComponent;
 
 import java.util.List;
+import java.util.Objects;
 
 import static net.zestyblaze.nomadbooks.util.Helper.findItem;
 import static net.zestyblaze.nomadbooks.util.Helper.hasNoExtraItems;
 
+// This one will never be vanilla style.
+// Even the most basic form in a smithing table would need to read height for a height += 1 operation.
+// I would need some magic mixins to pull this off as vanilla. More magic than even the Itinerant Ink hack
 public class NomadBookHeightUpgradeRecipe extends SpecialCraftingRecipe {
-    public NomadBookHeightUpgradeRecipe(/*Identifier id, */CraftingRecipeCategory category) {
-        // I decided to switch to single page. Multiple pages still works, but it shows just 1 in the Recipe book (BUT IT SHOWS AT ALL)
-        super(/*id, "", */category/*, new ItemStack(ModItems.NOMAD_BOOK), DefaultedList.copyOf(Ingredient.EMPTY,
-            Ingredient.ofStacks(ModItems.NOMAD_BOOK.getDefaultStack(), ModItems.NETHER_NOMAD_BOOK.getDefaultStack()), Ingredient.ofItems(ModItems.GRASS_PAGE))*/);
-    }
+	public NomadBookHeightUpgradeRecipe(CraftingRecipeCategory category) {
+		super(category);
+	}
 
-    @Override
-    public boolean matches(RecipeInputInventory container, World level) {
-        ItemStack book = findItem(container, stack -> stack.getItem() instanceof NomadBookItem);
-        List<ItemStack> pageStacks = container.getHeldStacks().stream()
-            .filter(stack -> stack.getItem().equals(ModItems.GRASS_PAGE)).toList();
+	@Override
+	public boolean matches(RecipeInputInventory container, World level) {
+		ItemStack book = findItem(container, stack -> stack.getItem() instanceof NomadBookItem);
+		List<ItemStack> pageStacks = container.getHeldStacks().stream()
+				.filter(stack -> stack.getItem().equals(ModItems.GRASS_PAGE)).toList();
 
-        return book != null && !pageStacks.isEmpty() && hasNoExtraItems(container, pageStacks.size()) &&
-            book.getOrCreateNbt().getFloat(Constants.DEPLOYED) == 0.0f; // Not deployed
-    }
+		return book != null && !pageStacks.isEmpty() && hasNoExtraItems(container, pageStacks.size()) &&
+				!Objects.requireNonNull(book.get(NomadBooks.NOMAD_BOOK_DATA)).isDeployed(); // Not deployed
+	}
 
-    @Override
-    public ItemStack craft(RecipeInputInventory container, DynamicRegistryManager registryAccess) {
-        ItemStack book = findItem(container, stack -> stack.getItem() instanceof NomadBookItem);
-        List<Item> pageStacks = container.getHeldStacks().stream()
-            .map(ItemStack::getItem)
-            .filter(item -> item.equals(ModItems.GRASS_PAGE)).toList();
+	@Override
+	public ItemStack craft(RecipeInputInventory container, RegistryWrapper.WrapperLookup registryAccess) {
+		ItemStack book = findItem(container, stack -> stack.getItem() instanceof NomadBookItem);
+		List<Item> pageStacks = container.getHeldStacks().stream()
+				.map(ItemStack::getItem)
+				.filter(item -> item.equals(ModItems.GRASS_PAGE)).toList();
 
-        if (book != null && !pageStacks.isEmpty() && hasNoExtraItems(container, pageStacks.size()) &&
-            book.getOrCreateNbt().getFloat(Constants.DEPLOYED) == 0.0f) { // Not deployed
-            ItemStack ret = book.copy();
-            int height = ret.getOrCreateSubNbt(Constants.MODID).getInt(Constants.HEIGHT);
-            NbtCompound tags = ret.getOrCreateSubNbt(Constants.MODID);
-            tags.putInt(Constants.HEIGHT, height + pageStacks.size());
-            return ret;
-        }
-        return ItemStack.EMPTY;
-    }
+		if (book != null && !pageStacks.isEmpty() && hasNoExtraItems(container, pageStacks.size()) &&
+				!Objects.requireNonNull(book.get(NomadBooks.NOMAD_BOOK_DATA)).isDeployed()) { // Not deployed
+			ItemStack ret = book.copy();
+			NomadBooksComponent tags = ret.get(NomadBooks.NOMAD_BOOK_DATA);
+			assert tags != null;
+			ret.set(NomadBooks.NOMAD_BOOK_DATA, new NomadBooksComponent(false, false, tags.height() + pageStacks.size(), tags.width(), tags.structure(), tags.upgrades()));
+			return ret;
+		}
+		return ItemStack.EMPTY;
+	}
 
-    @Override
-    public boolean fits(int width, int height) {
-        return width >= 3 && height >= 3;
-    }
+	@Override
+	public boolean fits(int width, int height) {
+		return width * height >= 2;
+	}
 
-    @Override
-    public RecipeSerializer<?> getSerializer() {
-        return NomadBooks.UPGRADE_HEIGHT_NOMAD_BOOK;
-    }
+	@Override
+	public RecipeSerializer<?> getSerializer() {
+		return NomadBooks.UPGRADE_HEIGHT_NOMAD_BOOK;
+	}
 }

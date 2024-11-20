@@ -9,12 +9,16 @@ java {
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
 }
 
 base {
 	archivesName = project.name
+}
+
+loom {
+	accessWidenerPath = file("src/main/resources/nomad_books.accesswidener")
 }
 
 version = "${project.mod_version}-${project.minecraft_version}"
@@ -83,6 +87,18 @@ processResources {
 			"loader_version": project.loader_version
 	}
 }
+
+tasks {
+	runClient {
+		doFirst {
+			copy {
+				from configurations.modImplementation
+				into "run/mods"
+			}
+		}
+	}
+}
+
 
 tasks.withType(JavaCompile).configureEach {
 	it.options.release = 17

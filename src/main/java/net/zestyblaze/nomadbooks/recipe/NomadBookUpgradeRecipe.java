@@ -2,69 +2,72 @@ package net.zestyblaze.nomadbooks.recipe;
 
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
-import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.world.World;
 import net.zestyblaze.nomadbooks.NomadBooks;
 import net.zestyblaze.nomadbooks.item.BookUpgradeItem;
 import net.zestyblaze.nomadbooks.item.NomadBookItem;
-import net.zestyblaze.nomadbooks.util.Constants;
+import net.zestyblaze.nomadbooks.util.NomadBooksComponent;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static net.zestyblaze.nomadbooks.util.Helper.findItem;
 import static net.zestyblaze.nomadbooks.util.Helper.hasNoExtraItems;
 
+// could be vanilla style only if each upgrade was its own component. Not the worst idea. But maybe worse than jei/rei/emi support
 public class NomadBookUpgradeRecipe extends SpecialCraftingRecipe {
-    public NomadBookUpgradeRecipe(/*Identifier resourceLocation, */CraftingRecipeCategory category) {
-        super(/*resourceLocation.toString(), */category/*, new ItemStack(ModItems.NOMAD_BOOK),*/
-            /*DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofStacks(ModItems.NOMAD_BOOK.getDefaultStack(), ModItems.NETHER_NOMAD_BOOK.getDefaultStack()), Ingredient.ofItems(ModItems.AQUATIC_MEMBRANE_PAGE, ModItems.MYCELIUM_PAGE, ModItems.SPACIAL_DISPLACER_PAGE))*/);
-    }
+	public NomadBookUpgradeRecipe(CraftingRecipeCategory category) {
+		super(category);
+	}
 
-    @Override
-    public boolean matches(RecipeInputInventory container, World level) {
-        ItemStack book = findItem(container, item -> item.getItem() instanceof NomadBookItem);
-        ItemStack upgrade = findItem(container, item -> item.getItem() instanceof BookUpgradeItem);
+	@Override
+	public boolean matches(RecipeInputInventory container, World level) {
+		ItemStack book = findItem(container, item -> item.getItem() instanceof NomadBookItem);
+		ItemStack upgrade = findItem(container, item -> item.getItem() instanceof BookUpgradeItem);
 
-        return book != null && upgrade != null && hasNoExtraItems(container, 1);
-    }
+		return book != null && upgrade != null && hasNoExtraItems(container, 1);
+	}
 
-    @Override
-    public ItemStack craft(RecipeInputInventory container, DynamicRegistryManager registryAccess) {
-        ItemStack book = findItem(container, item -> item.getItem() instanceof NomadBookItem);
-        ItemStack upgrade = findItem(container, item -> item.getItem() instanceof BookUpgradeItem);
+	@Override
+	public ItemStack craft(RecipeInputInventory container, RegistryWrapper.WrapperLookup registryAccess) {
+		ItemStack book = findItem(container, item -> item.getItem() instanceof NomadBookItem);
+		ItemStack upgrade = findItem(container, item -> item.getItem() instanceof BookUpgradeItem);
 
-        if (book != null && upgrade != null && hasNoExtraItems(container, 1)) {
-            ItemStack result = book.copy();
-            NbtCompound tag = result.getOrCreateSubNbt(Constants.MODID);
-            NbtList upgradeList = tag.getList(Constants.UPGRADES, NbtElement.STRING_TYPE);
+		if (book != null && upgrade != null && hasNoExtraItems(container, 1)) {
+			ItemStack result = book.copy();
+			Optional<NomadBooksComponent> tags = Optional.ofNullable(result.get(NomadBooks.NOMAD_BOOK_DATA));
+			if(tags.isEmpty()) {
+				return ItemStack.EMPTY;
+			}
+			List<String> upgradeList = new ArrayList<>(tags.get().upgrades());
 
-            if (!upgradeList.contains(NbtString.of(getUpgrade(upgrade)))) {
-                upgradeList.add(NbtString.of(getUpgrade(upgrade)));
-                tag.put(Constants.UPGRADES, upgradeList);
-            }
+			if (!upgradeList.contains(getUpgrade(upgrade))) {
+				upgradeList.add(getUpgrade(upgrade));
+				result.set(NomadBooks.NOMAD_BOOK_DATA, new NomadBooksComponent(tags.get().isDeployed(), tags.get().doDisplayBoundaries(), tags.get().height(), tags.get().width(), tags.get().structure(), upgradeList));
+			}
 
-            return result;
-        }
+			return result;
+		}
 
-        return ItemStack.EMPTY;
-    }
+		return ItemStack.EMPTY;
+	}
 
-    private String getUpgrade(ItemStack itemStack) {
-        return ((BookUpgradeItem) itemStack.getItem()).getUpgrade();
-    }
+	private String getUpgrade(ItemStack itemStack) {
+		return ((BookUpgradeItem) itemStack.getItem()).getUpgrade();
+	}
 
-    @Override
-    public boolean fits(int width, int height) {
-        return width >= 3 && height >= 3;
-    }
+	@Override
+	public boolean fits(int width, int height) {
+		return width * height >= 2;
+	}
 
-    @Override
-    public RecipeSerializer<?> getSerializer() {
-        return NomadBooks.UPGRADE_NOMAD_BOOK;
-    }
+	@Override
+	public RecipeSerializer<?> getSerializer() {
+		return NomadBooks.UPGRADE_NOMAD_BOOK;
+	}
 }

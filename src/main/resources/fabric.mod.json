@@ -2,6 +2,7 @@
   "schemaVersion": 1,
   "id": "nomadbooks",
   "version": "${version}",
+  "accessWidener": "nomad_books.accesswidener",
 
   "name": "Nomad Books Redux",
   "description": "Nomad encampments deployed from books",
@@ -42,7 +43,7 @@
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
     "minecraft": $compatible_minecraft_versions,
-    "java": ">=17"
+    "java": ">=21"
   },
   "suggests": {
     "another-mod": "*"

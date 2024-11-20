@@ -39,6 +39,13 @@ public class Helper {
 		return emptySlots == allSlotsMinusFilledSlots;
 	}
 
+	/**
+	 * Generic helper method to provide an alternative if null pointer is encountered from the first argument
+	 */
+	public static <T> T getOrElse(T first, T second) {
+		return (first != null) ? first : second;
+	}
+
 //	Compat stuff
 	public static boolean isModLoaded(String id) {
 		return FabricLoader.getInstance().isModLoaded(id);
