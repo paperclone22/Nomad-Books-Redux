@@ -1,6 +1,7 @@
 plugins {
 	id "fabric-loom" version "1.8-SNAPSHOT"
 	id "maven-publish"
+	id "java"
 }
 
 java {
@@ -99,13 +100,8 @@ tasks {
 	}
 }
 
-
 tasks.withType(JavaCompile).configureEach {
 	it.options.release = 17
-}
-
-java {
-	withSourcesJar()
 }
 
 jar {
@@ -116,9 +112,10 @@ jar {
 
 publishing {
 	publications {
-//		mavenJava(MavenPublication) {
-//			from components.java
-//		}
+		mavenJava(MavenPublication) {
+			artifactId = project.name
+			from components.java
+		}
 	}
 
 	repositories {

@@ -1,0 +1,29 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_grass_page": {
+      "conditions": {
+        "items": [
+          {
+            "items": "nomadbooks:grass_page"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_grass_page"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "nomadbooks:aquatic_membrane_page",
+      "nomadbooks:mycelium_page",
+      "nomadbooks:spacial_displacer_page",
+      "nomadbooks:nomad_book",
+      "nomadbooks:upgrade_height_nomad_book"
+    ]
+  }
+}

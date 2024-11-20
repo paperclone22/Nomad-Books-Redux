@@ -1,0 +1,30 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_nomad_book": {
+      "conditions": {
+        "items": [
+          {
+            "items": "nomadbooks:nomad_book"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_nomad_book"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "nomadbooks:nomad_book",
+      "nomadbooks:dismantle_nomad_book",
+      "nomadbooks:nether_nomad_book_smithing",
+      "nomadbooks:extend_nether_book_width_smithing",
+      "nomadbooks:extend_book_width_smithing",
+      "nomadbooks:upgrade_nomad_book"
+    ]
+  }
+}

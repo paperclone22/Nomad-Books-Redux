@@ -22,10 +22,10 @@
       "nomadbooks:nomad_book_data": {
         "is_deployed": false,
         "do_display_boundaries": false,
-        "height": 1,
+        "height": 2,
         "width": 3,
         "structure": "nomadbooks:campfire3x1x3",
-        "upgrades_flagged": []
+        "upgrades": []
       },
       "nomadbooks:nomad_ink_data": {
         "is_inked": false,
