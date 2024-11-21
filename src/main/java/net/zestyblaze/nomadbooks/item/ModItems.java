@@ -53,11 +53,11 @@ public class ModItems {
 	// Mod Block Items
 	public static Block registerBlock(String name, Block block) {
 		registerBlockItem(name, block);
-		return Blocks.register(new Identifier(Constants.MODID, name).toString(), block);
+		return Blocks.register(Identifier.of(Constants.MODID, name).toString(), block);
 	}
 
 	private static void registerBlockItem(String name, Block block) {
-		Items.register(new Identifier(Constants.MODID, name), new BlockItem(block, new Item.Settings()));
+		Items.register(Identifier.of(Constants.MODID, name), new BlockItem(block, new Item.Settings()));
 	}
 
 	// Creative Tab
@@ -87,7 +87,7 @@ public class ModItems {
 	 * @return net.minecraft.world.item.Item
 	 */
 	public static Item registerItem(String name, Item item) {
-		return Registry.register(Registries.ITEM, new Identifier(Constants.MODID, name), item);
+		return Registry.register(Registries.ITEM, Identifier.of(Constants.MODID, name), item);
 	}
 
 	/**

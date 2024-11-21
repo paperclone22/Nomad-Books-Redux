@@ -36,7 +36,7 @@ public class NomadBooksClient implements ClientModInitializer {
         BlockRenderLayerMap.INSTANCE.putBlock(NomadBooks.MEMBRANE, RenderLayer.getTranslucent());
 
         // determines weather books should display the retrieved or deployed model
-        FabricModelPredicateProviderRegistry.register(new Identifier(Constants.DEPLOYED), ((itemStack, clientLevel, livingEntity, i) -> {
+        FabricModelPredicateProviderRegistry.register(Identifier.of(Constants.DEPLOYED), ((itemStack, clientLevel, livingEntity, i) -> {
             float v;
             if (Optional.ofNullable(itemStack.get(NomadBooks.NOMAD_BOOK_DATA)).isPresent()) {
                 v = Optional.ofNullable(itemStack.get(NomadBooks.NOMAD_BOOK_DATA)).get().isDeployed() ? 1.0f : 0.0f;

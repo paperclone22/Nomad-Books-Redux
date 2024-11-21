@@ -6,7 +6,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.item.TooltipType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LodestoneTrackerComponent;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,6 +13,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.world.ServerWorld;
@@ -57,7 +57,7 @@ import static net.zestyblaze.nomadbooks.util.Helper.getOrElse;
 import static net.zestyblaze.nomadbooks.util.NomadBooksYACLConfig.defaultStandardBookHeight;
 import static net.zestyblaze.nomadbooks.util.NomadBooksYACLConfig.defaultStandardBookWidth;
 
-public class NomadBookItem extends Item /*implements TooltipAppender*/ {
+public class NomadBookItem extends Item {
     public static final int CAMP_RETRIEVAL_RADIUS = 32;
 
     public static final String DEFAULT_STRUCTURE_PATH = Constants.MODID + ":campfire3x1x3";
@@ -139,7 +139,8 @@ public class NomadBookItem extends Item /*implements TooltipAppender*/ {
         if (hasFungiSupport) { // 🟪 check
             buildMushroomPlatform(world, pos, width); // 🟪 do
         }
-        if (!isSurfaceValid(world, pos, width)) { // if the surface is already valid then nothing in here matters // TODO Need to simplify this
+        // TODO concider experimenting with the order/priority of the upgrades. Like I feel that Spacial Displacer should act as a last resort. eg if Fungal Support can find a spot, then Funcal Support should be used without Spacial Displacer acting.
+        if (!isSurfaceValid(world, pos, width)) { // if the surface is already valid then nothing in here matters // TODO Need to simplify this.
             boolean foundValid = false;
             if (!hasFungiSupport && hasSpacialDisplacer) { // under the upgrade condition !fs && sd , we check if we can move down to find a flat surface
                 for (int i = 0; i < width/2; i++) { // we check down based on half the width of the camp rounded up. so wider camps can drop farther
@@ -186,14 +187,14 @@ public class NomadBookItem extends Item /*implements TooltipAppender*/ {
             // Save the structure
             StructureTemplate structure;
             try {
-                structure = structureTemplateManager.getTemplateOrBlank(new Identifier(structurePath + Constants.DISPLACED));
+                structure = structureTemplateManager.getTemplateOrBlank(Identifier.of(structurePath + Constants.DISPLACED));
             } catch (InvalidIdentifierException e) {
                 NomadBooks.LOGGER.error("Error creating or retrieving structure: {}", e.getMessage());
                 return ActionResult.FAIL;
             }
             structure.saveFromWorld(world, pos.add(new BlockPos(0, 0, 0)), new BlockPos(width, height, width), true, Blocks.STRUCTURE_VOID);
             structure.setAuthor(player.getNameForScoreboard());
-            structureTemplateManager.saveTemplate(new Identifier(structurePath + Constants.DISPLACED)); // added DISPLACED
+            structureTemplateManager.saveTemplate(Identifier.of(structurePath + Constants.DISPLACED)); // added DISPLACED
         }
         // Place the structure
         if (!world.isClient()) {
@@ -277,7 +278,7 @@ public class NomadBookItem extends Item /*implements TooltipAppender*/ {
 
     private void placeStructure(World level, String structurePath, BlockPos pos, int width, boolean hasSpacialDisplacer) {
         ServerWorld serverLevel = (ServerWorld) level;
-        Optional<StructureTemplate> structure = serverLevel.getStructureTemplateManager().getTemplate(new Identifier(structurePath));
+        Optional<StructureTemplate> structure = serverLevel.getStructureTemplateManager().getTemplate(Identifier.of(structurePath));
 
         if (structure.isPresent()) {
             int offsetWidth = (width - structure.get().getSize().getX()) / 2;
@@ -414,7 +415,7 @@ public class NomadBookItem extends Item /*implements TooltipAppender*/ {
         // Check if the structure path needs to be generated
         if (structurePath.equals(DEFAULT_STRUCTURE_PATH) || structurePath.equals(NETHER_DEFAULT_STRUCTURE_PATH) || structurePath.equals(CREATIVE_DEFAULT_STRUCTURE_PATH)) {
             List<String> path = Arrays.asList(user.getUuid().toString(), String.valueOf(System.currentTimeMillis()));
-            structurePath = new Identifier(Constants.MODID, Strings.join(path, "/")).toString();
+            structurePath = Identifier.of(Constants.MODID, Strings.join(path, "/")).toString();
             NomadBooks.LOGGER.info("Creating Structure (Server thread): {}", structurePath);
         }
         // Server-side logic
@@ -431,14 +432,14 @@ public class NomadBookItem extends Item /*implements TooltipAppender*/ {
             // Save the structure
             StructureTemplate structure;
             try {
-                structure = structureTemplateManager.getTemplateOrBlank(new Identifier(structurePath));
+                structure = structureTemplateManager.getTemplateOrBlank(Identifier.of(structurePath));
             } catch (InvalidIdentifierException e) {
                 NomadBooks.LOGGER.error("(Server thread) Error creating or retrieving structure: {}", e.getMessage());
                 return DEFAULT_STRUCTURE_PATH; // 🟧  Return false on error
             }
             structure.saveFromWorld(world, pos.add(new BlockPos(0, 0, 0)), new BlockPos(width, height, width), true, Blocks.STRUCTURE_VOID); // STRUCTURE_VOID is being ignored. treat it like air. No idea why I'm including entities
             structure.setAuthor(user.getNameForScoreboard());
-            structureTemplateManager.saveTemplate(new Identifier(structurePath));
+            structureTemplateManager.saveTemplate(Identifier.of(structurePath));
         }
         return structurePath; // Return true indicating success
     }

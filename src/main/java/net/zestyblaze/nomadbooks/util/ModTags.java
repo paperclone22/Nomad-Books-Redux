@@ -17,7 +17,7 @@ public class ModTags {
 		public static final TagKey<Block> IS_NOT_DISPLACEABLE = createTag("terrain_not_displaceable");
 
 		private static TagKey<Block> createTag(String name) {
-			return TagKey.of(Registries.BLOCK.getKey(), new Identifier(Constants.MODID, name));
+			return TagKey.of(Registries.BLOCK.getKey(), Identifier.of(Constants.MODID, name));
 		}
 	}
 
@@ -27,7 +27,7 @@ public class ModTags {
 
 		@SuppressWarnings("Unused")
 		private static TagKey<Item> createTag(String name) {
-			return TagKey.of(Registries.ITEM.getKey(), new Identifier(Constants.MODID, name));
+			return TagKey.of(Registries.ITEM.getKey(), Identifier.of(Constants.MODID, name));
 		}
 	}
 

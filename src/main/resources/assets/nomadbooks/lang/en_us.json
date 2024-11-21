@@ -27,6 +27,7 @@
   "upgrade.nomadbooks.aquatic_membrane": "Aquatic Membrane",
   "upgrade.nomadbooks.fungi_support": "Fungi Support",
   "upgrade.nomadbooks.spacial_displacer": "Spacial Displacer",
+  "tag.item.nomadbooks.nomad_book_item": "nomad_book_item",
   "nomadbooks.yacl.title": "Nomad Books Redux",
   "nomadbooks.yacl.start_with_book": "Enable Start with a Book",
   "nomadbooks.yacl.start_with_book.desc": "Every player is given a nomad book the first time they join each world",

@@ -6,7 +6,7 @@ import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.MapColor;
-import net.minecraft.component.DataComponentType;
+import net.minecraft.component.ComponentType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootPool;
 import net.minecraft.loot.entry.ItemEntry;
@@ -51,14 +51,14 @@ public class NomadBooks implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(Constants.MODID);
 
 	// Loot Table Names
-	private static final Identifier DUNGEON_CHEST_LOOT_TABLE_ID = new Identifier(MINECRAFT, "chests/simple_dungeon");
-	private static final Identifier MINESHAFT_CHEST_LOOT_TABLE_ID = new Identifier(MINECRAFT, "chests/abandoned_mineshaft");
-	private static final Identifier TEMPLE_CHEST_LOOT_TABLE_ID = new Identifier(MINECRAFT, "chests/jungle_temple");
-	private static final Identifier TREASURE_CHEST_LOOT_TABLE_ID = new Identifier(MINECRAFT, "chests/buried_treasure");
-	private static final Identifier OUTPOST_CHEST_LOOT_TABLE_ID = new Identifier(MINECRAFT, "chests/pillager_outpost");
-	private static final Identifier STRONGHOLD_LIBRARY_CHEST_LOOT_TABLE_ID = new Identifier(MINECRAFT, "chests/stronghold_library");
-	private static final Identifier CARTOGRAPHER_CHEST_LOOT_TABLE_ID = new Identifier(MINECRAFT, "chests/village/village_cartographer");
-	private static final Identifier BONUS_CHEST_LOOT_TABLE_ID = new Identifier(MINECRAFT, "chests/spawn_bonus_chest");
+	private static final Identifier DUNGEON_CHEST_LOOT_TABLE_ID = Identifier.of(MINECRAFT, "chests/simple_dungeon");
+	private static final Identifier MINESHAFT_CHEST_LOOT_TABLE_ID = Identifier.of(MINECRAFT, "chests/abandoned_mineshaft");
+	private static final Identifier TEMPLE_CHEST_LOOT_TABLE_ID = Identifier.of(MINECRAFT, "chests/jungle_temple");
+	private static final Identifier TREASURE_CHEST_LOOT_TABLE_ID = Identifier.of(MINECRAFT, "chests/buried_treasure");
+	private static final Identifier OUTPOST_CHEST_LOOT_TABLE_ID = Identifier.of(MINECRAFT, "chests/pillager_outpost");
+	private static final Identifier STRONGHOLD_LIBRARY_CHEST_LOOT_TABLE_ID = Identifier.of(MINECRAFT, "chests/stronghold_library");
+	private static final Identifier CARTOGRAPHER_CHEST_LOOT_TABLE_ID = Identifier.of(MINECRAFT, "chests/village/village_cartographer");
+	private static final Identifier BONUS_CHEST_LOOT_TABLE_ID = Identifier.of(MINECRAFT, "chests/spawn_bonus_chest");
 
 
 	// Register Mod Blocks
@@ -67,20 +67,20 @@ public class NomadBooks implements ModInitializer {
 	public static final Block NOMAD_MUSHROOM_STEM = ModItems.registerBlock( "nomad_mushroom_stem", new NomadMushroomStemBlock(FabricBlockSettings.copyOf(Blocks.OAK_LOG).mapColor(MapColor.TERRACOTTA_WHITE).strength(0.6F, 0).sounds(BlockSoundGroup.WOOD).notSolid()));
 
 	// Register Mod Recipes
-	public static final RecipeSerializer<NomadBookHeightUpgradeRecipe> UPGRADE_HEIGHT_NOMAD_BOOK = RecipeSerializer.register(new Identifier(Constants.MODID, "crafting_special_nomadbookupgradeheight").toString(), new SpecialRecipeSerializer<>(NomadBookHeightUpgradeRecipe::new));
-	public static final RecipeSerializer<NomadBookDismantleRecipe> DISMANTLE_NOMAD_BOOK = RecipeSerializer.register(new Identifier(Constants.MODID, "crafting_special_nomadbookdismantle").toString(), new SpecialRecipeSerializer<>(NomadBookDismantleRecipe::new)); // Special
-	public static final RecipeSerializer<NomadBookUpgradeRecipe> UPGRADE_NOMAD_BOOK = RecipeSerializer.register(new Identifier(Constants.MODID, "crafting_special_nomadbookupgrade").toString(), new SpecialRecipeSerializer<>(NomadBookUpgradeRecipe::new));
+	public static final RecipeSerializer<NomadBookHeightUpgradeRecipe> UPGRADE_HEIGHT_NOMAD_BOOK = RecipeSerializer.register(Identifier.of(Constants.MODID, "crafting_special_nomadbookupgradeheight").toString(), new SpecialRecipeSerializer<>(NomadBookHeightUpgradeRecipe::new));
+	public static final RecipeSerializer<NomadBookDismantleRecipe> DISMANTLE_NOMAD_BOOK = RecipeSerializer.register(Identifier.of(Constants.MODID, "crafting_special_nomadbookdismantle").toString(), new SpecialRecipeSerializer<>(NomadBookDismantleRecipe::new)); // Special
+	public static final RecipeSerializer<NomadBookUpgradeRecipe> UPGRADE_NOMAD_BOOK = RecipeSerializer.register(Identifier.of(Constants.MODID, "crafting_special_nomadbookupgrade").toString(), new SpecialRecipeSerializer<>(NomadBookUpgradeRecipe::new));
 
 	// Register Components
-		private static <T> DataComponentType<T> register(Identifier id, UnaryOperator<DataComponentType.Builder<T>> builderOperator) {
-			return Registry.register(Registries.DATA_COMPONENT_TYPE, id, builderOperator.apply(DataComponentType.builder()).build());
+		private static <T> ComponentType<T> register(Identifier id, UnaryOperator<ComponentType.Builder<T>> builderOperator) {
+			return Registry.register(Registries.DATA_COMPONENT_TYPE, id, builderOperator.apply(ComponentType.builder()).build());
 		}
 
-	public static final DataComponentType<NomadBooksComponent> NOMAD_BOOK_DATA = register(
-			new Identifier(Constants.MODID, "nomad_book_data"), builder -> builder.codec(NomadBooksComponent.CODEC).packetCodec(NomadBooksComponent.PACKET_CODEC).cache()
+	public static final ComponentType<NomadBooksComponent> NOMAD_BOOK_DATA = register(
+			Identifier.of(Constants.MODID, "nomad_book_data"), builder -> builder.codec(NomadBooksComponent.CODEC).packetCodec(NomadBooksComponent.PACKET_CODEC).cache()
 	);
-	public static final DataComponentType<NomadInkComponent> NOMAD_INK_DATA = register(
-			new Identifier(Constants.MODID, "nomad_ink_data"), builder -> builder.codec(NomadInkComponent.CODEC).packetCodec(NomadInkComponent.PACKET_CODEC).cache()
+	public static final ComponentType<NomadInkComponent> NOMAD_INK_DATA = register(
+			Identifier.of(Constants.MODID, "nomad_ink_data"), builder -> builder.codec(NomadInkComponent.CODEC).packetCodec(NomadInkComponent.PACKET_CODEC).cache()
 	);
 
 	@Override

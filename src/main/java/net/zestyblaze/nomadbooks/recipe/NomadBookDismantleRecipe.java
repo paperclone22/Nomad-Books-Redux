@@ -1,10 +1,10 @@
 package net.zestyblaze.nomadbooks.recipe;
 
-import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
+import net.minecraft.recipe.input.CraftingRecipeInput;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.world.World;
 import net.zestyblaze.nomadbooks.NomadBooks;
@@ -30,13 +30,13 @@ public class NomadBookDismantleRecipe extends SpecialCraftingRecipe {
 	}
 
 	@Override
-	public boolean matches(RecipeInputInventory container, World level) {
+	public boolean matches(CraftingRecipeInput container, World level) {
 		ItemStack book = findItem(container, item -> item.getItem() instanceof NomadBookItem);
 		return book != null && hasNoExtraItems(container, 0) && Objects.requireNonNull(book.get(NomadBooks.NOMAD_BOOK_DATA)).isDeployed();  // is deployed
 	}
 
 	@Override
-	public ItemStack craft(RecipeInputInventory container, RegistryWrapper.WrapperLookup registryAccess) {
+	public ItemStack craft(CraftingRecipeInput container, RegistryWrapper.WrapperLookup registryAccess) {
 		ItemStack book = findItem(container, item -> item.getItem() instanceof NomadBookItem);
 
 		if (book != null) {
